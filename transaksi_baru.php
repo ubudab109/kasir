@@ -14,6 +14,8 @@
 
 	// tambah script untuk autocomplete search dropdown produk
 </script>
+
+
 <div class="content">
 	<div class="padding">
 		<div class="bgwhite">
@@ -21,6 +23,7 @@
 				<h3 class="jdl">Entry Transaksi Baru</h3>
 				<form class="form-input" method="post" action="handler.php?action=tambah_tempo" style="padding-top: 30px;">
 					<label>Pilih Barang : </label>
+					<input type="text" name="nama_barang" id="nama_barang_auto">
 					<select style="width: 372px;cursor: pointer;" required="required" name="id_barang">
 						<?php
 
@@ -104,6 +107,35 @@
 
 	</div>
 </div>
+<script type="text/javascript">
+	$(document).ready(function() {
+		var arr = [];
+		$.ajax({
+			url: "getNamaBarang.php",
+			method: "GET",
+		}).then(function(res) {
+			var json = $.parseJSON(res);
+			if (json["res"] == "oke") {
+				var num = json["num"]
+				for (var i = 0; i < num; i++) {
+					// console.log(json["data"][i]["nama_barang"])
+					var result = json["data"][i]["nama_barang"];
+					arr.push(result)
+
+
+				}
+
+			}
+		})
+		console.log(arr);
+	})
+	// $("#nama_barang_auto").keyup(function(e) {
+	// 	e.preventDefault();
+	// 	var namaBarang = $("#nama_barang_auto").val();
+	// 	// console.log(namaBarang)
+
+	// })
+</script>
 
 <?php
 include "foot.php";

@@ -158,6 +158,34 @@ class penjualan
 			echo "<td></td><td colspan='5'>Maaf, barang yang anda cari tidak ada!</td>";
 		}
 	}
+	function getNamaBarang()
+	{
+		$query = $this->con->query("SELECT * FROM barang");
+		// $fetch = $query->fetch_row();
+		if ($query->num_rows > 0) {
+
+			$tmp = array();
+			while ($row = mysqli_fetch_assoc($query)) {
+				array_push($tmp, array(
+					'id_barang' => $row['id_barang'],
+					'nama_barang' => $row['nama_barang'],
+				));
+			}
+			$result = [
+				"res" => 'oke',
+				"num" => count($tmp),
+				"data" => $tmp
+			];
+		} else {
+			$result = [
+				"res" => 'null',
+				"data" => null,
+			];
+		}
+
+
+		return json_encode($result);
+	}
 	function tampil_barang_filter($id_cat)
 	{
 		$query = $this->con->query("select barang.id_barang,barang.nama_barang,barang.stok,barang.harga_beli,barang.harga_jual,barang.date_added,kategori.nama_kategori from barang inner join kategori on kategori.id_kategori=barang.id_kategori where kategori.id_kategori='$id_cat'");
