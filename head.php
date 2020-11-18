@@ -12,8 +12,15 @@ if (!isset($_SESSION['username'])) {
 	<title></title>
 	<link rel="stylesheet" type="text/css" href="assets/index.css">
 	<link rel="stylesheet" type="text/css" href="assets/awesome/css/font-awesome.min.css">
+	<!-- <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css"> -->
+	<link rel="stylesheet" href="assets/choosen/chosen.min.css">
 	<link rel="stylesheet" href="assets/jquery-ui/jquery-ui.css">
+	<link rel="stylesheet" href="assets/font-awesom.min.css" />
+	<link rel="stylesheet" href="assets/all.min.css" />
 	<script type="text/javascript" src="assets/jquery-ui/external/jquery/jquery.js"></script>
+	<script type="text/javascript" src="assets/font-awesome.min.js"></script>
+	<script type="text/javascript" src="assets/choosen/chosen.jquery.min.js"></script>
+	<script type="text/javascript" src="assets/choosen/chosen.proto.min.js"></script>
 	<script type="text/javascript" src="assets/jquery-ui/jquery-ui.js"></script>
 </head>
 
@@ -33,11 +40,23 @@ if (!isset($_SESSION['username'])) {
 				<li><a id="kategori" href="kategori.php"><i class="fa fa-tags"></i> Kategori Barang</a></li>
 				<li><a id="users" href="users.php"><i class="fa fa-users"></i> Kasir</a></li>
 				<li><a id="laporan" href="laporan.php"><i class="fa fa-book"></i> Laporan</a></li>
+				<?php
+				if ($_SESSION['status'] == 1) {
+				?>
+					<li><a href="setting_akun.php"><i class="fa fa-cog"></i> Pengaturan Akun</a></li>
+				<?php } ?>
+				<li><a href="handler.php?action=logout"><i class="fa fa-sign-out"></i> Logout</a></li>
 			<?php
 			} else {
 			?>
 				<li><a id="transaksi" href="transaksi.php"><i class="fa fa-money"></i> Transaksi</a></li>
-
+				<li><a id="laporan-transaksi" href="#"><i class="fa fa-money"></i> Laporan Transaksi</a></li>
+				<?php
+				if ($_SESSION['status'] == 1) {
+				?>
+					<li><a href="setting_akun.php"><i class="fa fa-cog"></i> Pengaturan Akun</a></li>
+				<?php } ?>
+				<li><a href="handler.php?action=logout"><i class="fa fa-sign-out"></i> Logout</a></li>
 			<?php
 			}
 			?>
@@ -47,12 +66,7 @@ if (!isset($_SESSION['username'])) {
 		<ul>
 			<li><a href=""><i class="fa fa-user"></i> <?= $_SESSION['username'] ?></a>
 				<ul>
-					<?php
-					if ($_SESSION['status'] == 1) {
-					?>
-						<li><a href="setting_akun.php"><i class="fa fa-cog"></i> Pengaturan Akun</a></li>
-					<?php } ?>
-					<li><a href="handler.php?action=logout"><i class="fa fa-sign-out"></i> Logout</a></li>
+
 				</ul>
 			</li>
 		</ul>

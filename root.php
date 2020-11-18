@@ -68,14 +68,14 @@ class penjualan
 			}
 		}
 	}
-	function tambah_barang($nama_barang, $stok, $harga_beli, $harga_jual, $id_kategori)
+	function tambah_barang($nama_barang, $stok, $harga_beli, $harga_jual, $id_kategori, $file)
 	{
 		$query = $this->con->query("select * from barang where nama_barang='$nama_barang'");
 		if ($query->num_rows > 0) {
 			$this->alert("Data barang sudah ada");
 			$this->go_back();
 		} else {
-			$query2 = $this->con->query("insert into barang set nama_barang='$nama_barang',id_kategori='$id_kategori',stok='$stok',harga_beli='$harga_beli',harga_jual='$harga_jual'");
+			$query2 = $this->con->query("insert into barang set nama_barang='$nama_barang',id_kategori='$id_kategori',stok='$stok',harga_beli='$harga_beli',harga_jual='$harga_jual', foto_produk='$file'");
 			if ($query2 === TRUE) {
 				$this->alert("Barang Berhasil Ditambahkan");
 				$this->redirect("barang.php");
@@ -145,10 +145,20 @@ class penjualan
 					<td><?= $data['stok'] ?></td>
 					<td>Rp. <?= number_format($data['harga_beli']) ?></td>
 					<td>Rp. <?= number_format($data['harga_jual']) ?></td>
+					<?php 
+                    $dataDiskon = $this->con->query("SELECT * FROM tb_diskon WHERE id_barang = '$data[id_barang]'");
+                    if ($dataDiskon->num_rows > 0){ 
+                    	$fetch = $dataDiskon->fetch_assoc();
+                    ?>
+                    <td><?= $fetch['jumlah_diskon'] ?>%</td>
+					<?   } else{ ?>
+						<td>Tidak Ada Diskon</td>
+					<? }?>
 					<td><?= date("d-m-Y", strtotime($data['date_added'])) ?></td>
 					<td>
 						<a href="?action=edit_barang&id_barang=<?= $data['id_barang'] ?>" class="btn bluetbl m-r-10"><span class="btn-edit-tooltip">Edit</span><i class="fa fa-pencil"></i></a>
 						<a href="handler.php?action=hapus_barang&id_barang=<?= $data['id_barang'] ?>" class="btn redtbl" onclick="return confirm('yakin ingin menghapus <?= $data['nama_barang'] . " (id : " . $data['id_barang'] ?>) ?')"><span class="btn-hapus-tooltip">Hapus</span><i class="fa fa-trash"></i></a>
+						
 					</td>
 				</tr>
 			<?php
@@ -158,6 +168,8 @@ class penjualan
 			echo "<td></td><td colspan='5'>Maaf, barang yang anda cari tidak ada!</td>";
 		}
 	}
+
+	// get nama barang untuk autocomplete
 	function getNamaBarang()
 	{
 		$query = $this->con->query("SELECT * FROM barang");
@@ -167,8 +179,10 @@ class penjualan
 			$tmp = array();
 			while ($row = mysqli_fetch_assoc($query)) {
 				array_push($tmp, array(
-					'id_barang' => $row['id_barang'],
-					'nama_barang' => $row['nama_barang'],
+					'label' => $row['nama_barang'],
+					'value' => $row['id_barang'],
+					'stok' => $row['stok'],
+					'harga' => $row['harga_jual'],
 				));
 			}
 			$result = [
@@ -367,6 +381,9 @@ class penjualan
 		if ($query === TRUE) {
 			$this->alert("barang id $id_barang telah dihapus");
 			$this->redirect("barang.php");
+		} else {
+			$this->alert("terjadi kesalahan");
+			$this->go_back();
 		}
 	}
 	function hapus_user($id_user)
@@ -463,28 +480,47 @@ class penjualan
 	{
 		$q1 = $this->con->query("select * from barang where id_barang='$id_barang'");
 		$data = $q1->fetch_assoc();
+		$quDiskon = $this->con->query("SELECT * FROM tb_diskon WHERE id_barang='$id_barang'");
+
 		if ($data['stok'] < $jumlah) {
 			$this->alert("stock tidak mencukupi");
-			$this->redirect("transaksi.php?action=transaksi_baru");
+			// $this->redirect("transaksi.php?action=transaksi_baru");
 		} else {
 			$q = $this->con->query("select * from tempo where id_barang='$id_barang'");
 			if ($q->num_rows > 0) {
 				$ubah = $q->fetch_assoc();
 				$jumbel = $ubah['jumlah_beli'] + $jumlah;
-				$total_harga = $jumbel * $data['harga_jual'];
+				if ($quDiskon->num_rows > 0) {
+					$fetch = $quDiskon->fetch_assoc();
+					$jumlahDiskon = $fetch['jumlah_diskon'];
+					$totalDiskon = $jumlahDiskon / 100;
+					$total_diskon = ($jumbel * $data['harga_jual']) * $totalDiskon;
+					$total_harga = ($jumbel * $data['harga_jual']) - $total_diskon;
+				} else {
+					$total_harga = $jumbel * $data['harga_jual'];
+				}
 				$dbquery = $this->con->query("update tempo set jumlah_beli='$jumbel',total_harga='$total_harga' where id_barang='$id_barang'");
 				if ($dbquery === TRUE) {
 					$this->con->query("update barang set stok=stok-$jumlah where id_barang='$id_barang'");
-					$this->alert("Tersimpan");
-					$this->redirect("transaksi.php?action=transaksi_baru");
+					// $this->alert("Tersimpan");
+					// $this->redirect("transaksi.php?action=transaksi_baru");
 				}
 			} else {
-				$total_harga = $jumlah * $data['harga_jual'];
+				if ($quDiskon->num_rows > 0) {
+					$fetch = $quDiskon->fetch_assoc();
+					$jumlahDiskon = $fetch['jumlah_diskon'];
+					$totalDiskon = $jumlahDiskon / 100;
+					$total_diskon = ($jumlah * $data['harga_jual']) * $totalDiskon;
+					$total_harga = ($jumlah * $data['harga_jual']) - $total_diskon;
+				} else {
+					$total_harga = $jumlah * $data['harga_jual'];
+				}
+				// $total_harga = $jumlah * $data['harga_jual'];
 				$query1 = $this->con->query("insert into tempo set id_barang='$id_barang',jumlah_beli='$jumlah',total_harga='$total_harga',trx='$trx'");
 				if ($query1 === TRUE) {
 					$this->con->query("update barang set stok=stok-$jumlah where id_barang='$id_barang'");
-					$this->alert("Tersimpan");
-					$this->redirect("transaksi.php?action=transaksi_baru");
+					// $this->alert("Tersimpan");
+					// $this->redirect("transaksi.php?action=transaksi_baru");
 				}
 			}
 		}
@@ -493,11 +529,17 @@ class penjualan
 	{
 		$query = $this->con->query("delete from tempo where id_subtransaksi='$id_tempo'");
 		if ($query === TRUE) {
-			$query2 = $this->con->query("update barang set stok=stok+$jumbel where id_barang='$id_barang'");
-			$this->alert("Barang berhasil dicancel");
-			$this->redirect("transaksi.php?action=transaksi_baru");
+			$this->con->query("update barang set stok=stok+$jumbel where id_barang='$id_barang'");
+			return 0;
+		} else {
+			return 1;
 		}
 	}
+	// function get_grand($trx)
+	// {
+
+	// 	return $getsum1;
+	// }
 }
 // coded by https://www.athoul.site
 $root = new penjualan();

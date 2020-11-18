@@ -12,7 +12,24 @@ if (isset($_GET['action'])) {
 		$root->redirect("index.php");
 	}
 	if ($action == "tambah_barang") {
-		$root->tambah_barang($_POST['nama_barang'], $_POST['stok'], $_POST['harga_beli'], $_POST['harga_jual'], $_POST['kategori']);
+		$rand = rand();
+		$ekstensi = array('png', 'jpg', 'jpeg', 'gif');
+		$filename = $_FILES['foto']['name'];
+		$ukuran = $_FILES['foto']['size'];
+		$ext = pathinfo($filename, PATHINFO_EXTENSION);
+		$file = $rand . '-' . $filename;
+		if (!in_array($ext, $ekstensi)) {
+			$this->alert("Format harus JPEG, JPG atau PNG");
+			$this->go_back();
+		} else {
+			if ($ukuran < 2044070) {
+				move_uploaded_file($_FILES['foto']['tmp_name'], 'images/produk/' . $file);
+				$root->tambah_barang($_POST['nama_barang'], $_POST['stok'], $_POST['harga_beli'], $_POST['harga_jual'], $_POST['kategori'], $file);
+			} else {
+				$this->alert("Maksimal Foto : 2 MegaByte");
+				$this->go_back();
+			}
+		}
 	}
 	if ($action == "tambah_kategori") {
 		$root->tambah_kategori($_POST['nama_kategori']);
@@ -24,6 +41,13 @@ if (isset($_GET['action'])) {
 		$root->aksi_edit_kategori($_POST['id_kategori'], $_POST['nama_kategori']);
 	}
 	if ($action == "hapus_barang") {
+		$getFoto = $root->con->query("SELECT * FROM barang WHERE id_barang = '$_GET[id_barang]'");
+		// $foto = $getFoto->fetch_assoc();
+		while ($data = $getFoto->fetch_assoc()) {
+			$foto_produk = 'images/produk/' . $data['foto_produk'];
+			unlink($foto_produk);
+		}
+
 		$root->hapus_barang($_GET['id_barang']);
 	}
 	if ($action == "edit_barang") {
@@ -61,7 +85,11 @@ if (isset($_GET['action'])) {
 		session_start();
 		$trx = date("d") . "/AF/" . $_SESSION['id'] . "/" . date("y/h/i/s");
 
-		$query = $root->con->query("INSERT INTO transaksi SET kode_kasir='$_SESSION[id]',total_bayar='$_POST[total_bayar]',no_invoice='$trx',nama_pembeli='$_POST[nama_pembeli]',email='$_POST[email]'");
+		if (!empty($_POST["email"])) {
+			$query = $root->con->query("INSERT INTO transaksi SET kode_kasir='$_SESSION[id]',total_bayar='$_POST[total_bayar]',no_invoice='$trx',nama_pembeli='$_POST[nama_pembeli]',email='$_POST[email]'");
+		} else {
+			$query = $root->con->query("INSERT INTO transaksi SET kode_kasir='$_SESSION[id]',total_bayar='$_POST[total_bayar]',no_invoice='$trx',nama_pembeli='$_POST[nama_pembeli]'");
+		}
 
 		$trx2 = date("d") . "/AF/" . $_SESSION['id'] . "/" . date("y");
 		$get1 = $root->con->query("select * from transaksi where no_invoice='$trx'");

@@ -21,23 +21,56 @@
 		<div class="bgwhite">
 			<div class="padding">
 				<h3 class="jdl">Entry Transaksi Baru</h3>
-				<form class="form-input" method="post" action="handler.php?action=tambah_tempo" style="padding-top: 30px;">
-					<label>Pilih Barang : </label>
-					<input type="text" name="nama_barang" id="nama_barang_auto">
-					<select style="width: 372px;cursor: pointer;" required="required" name="id_barang">
-						<?php
 
-						$data = $root->con->query("select * from barang");
-						while ($f = $data->fetch_assoc()) {
-							echo "<option value='$f[id_barang]'>$f[nama_barang] (stock : $f[stok] | Harga : " . number_format($f['harga_jual']) . ")</option>";
-						}
-						?>
-					</select>
-					<label>Jumlah Beli :</label>
-					<input required="required" type="number" name="jumlah">
-					<input type="hidden" name="trx" value="<?php echo date("d") . "/AF/" . $_SESSION['id'] . "/" . date("y") ?>">
-					<button class="btnblue" type="submit"><i class="fa fa-save"></i> Simpan</button>
-				</form>
+
+
+				<table class="table">
+					<thead class="thead-inverse">
+						<tr>
+							<th>Pilih Barang</th>
+							<!-- <th>Stok Barang</th>
+							<th>Harga</th> -->
+							<th>Jumlah Beli</th>
+							<th>Aksi</th>
+						</tr>
+					</thead>
+					<tbody>
+						<form class="form-inline" id="subt" method="post" style="padding-top: 30px;">
+
+							<tr class="no-border">
+								<td>
+									<div class="input-group">
+										<input type="hidden" class="form-control mb-2 mr-sm-2" id="stock" readonly disabled>
+										<input type="hidden" class="form-control mb-2 mr-sm-2" id="harga_jual" readonly disabled>
+										<select style="width: 372px;cursor: pointer;" required="required" class="chosen" id="id_barang" name="id_barang">
+											<?php
+
+											$data = $root->con->query("select * from barang");
+											while ($f = $data->fetch_assoc()) {
+												echo "<option value='$f[id_barang]'>$f[nama_barang] (stock : $f[stok] | Harga : " . number_format($f['harga_jual']) . ")</option>";
+											}
+											?>
+										</select>
+										<p class="text-danger" id="err_nama"></p>
+									</div>
+								</td>
+								<td>
+									<div class="input-group">
+										<input required="required" class="form-control mb-2 mr-sm-2" id="jumlah_beli" type="number" name="jumlah">
+										<p class="text-danger" id="err_jumlah"></p>
+										<input type="hidden" class="form-control mb-2 mr-sm-2" id="trx" name="trx" value="<?php echo date("d") . "/AF/" . $_SESSION['id'] . "/" . date("y") ?>">
+									</div>
+								</td>
+								<td>
+									<button class="btnblue" type="submit" id="simpan"><i class="fa fa-save"></i> Simpan</button>
+								</td>
+							</tr>
+						</form>
+
+					</tbody>
+				</table>
+
+
 
 			</div>
 		</div>
@@ -45,61 +78,9 @@
 		<div class="bgwhite">
 			<div class="padding">
 				<h3 class="jdl">Data transaksi</h3>
-				<table class="datatable" style="width: 100%;">
-					<thead>
-						<tr>
-							<th width="35px">NO</th>
-							<th>ID Barang</th>
-							<th>Nama Barang</th>
-							<th>Jumlah Beli</th>
-							<th>Total Harga</th>
-							<th>Aksi</th>
-						</tr>
-					</thead>
-					<tbody id="contenth">
-						<?php
-						$trx = date("d") . "/AF/" . $_SESSION['id'] . "/" . date("y");
-						$data = $root->con->query("select barang.nama_barang,tempo.id_subtransaksi,tempo.id_barang,tempo.jumlah_beli,tempo.total_harga from tempo inner join barang on barang.id_barang=tempo.id_barang where trx='$trx'");
-						$getsum = $root->con->query("select sum(total_harga) as grand_total from tempo where trx='$trx'");
-						$getsum1 = $getsum->fetch_assoc();
-						$no = 1;
-						while ($f = $data->fetch_assoc()) {
-						?><tr>
-								<td><?= $no++ ?></td>
-								<td><?= $f['id_barang'] ?></td>
-								<td><?= $f['nama_barang'] ?></td>
-								<td><?= $f['jumlah_beli'] ?></td>
-								<td>Rp. <?= number_format($f['total_harga']) ?></td>
-								<td><a href="handler.php?action=hapus_tempo&id_tempo=<?= $f['id_subtransaksi'] ?>&id_barang=<?= $f['id_barang'] ?>&jumbel=<?= $f['jumlah_beli'] ?>" class="btn redtbl"><span class="btn-hapus-tooltip">Cancel</span><i class="fa fa-close"></i></a></td>
-							</tr>
-						<?php
-						}
-						?>
-					</tbody>
+				<div id="dataBarang">
 
-					<tr>
-						<?php if ($getsum1['grand_total'] > 0) { ?>
-							<td colspan="3"></td>
-							<td>Grand Total :</td>
-							<td> Rp. <?= number_format($getsum1['grand_total']) ?></td>
-							<td></td>
-						<?php } else { ?>
-							<td colspan="6">Data masih kosong</td>
-						<?php } ?>
-					</tr>
-
-				</table>
-				<br>
-				<form class="form-input" action="handler.php?action=selesai_transaksi" method="post">
-					<label>Nama Pembeli :</label>
-					<input required="required" type="text" name="nama_pembeli">
-					<input type="hidden" name="total_bayar" value="<?= $getsum1['grand_total'] ?>">
-					<label>Email :</label>
-					<input required="required" type="email" name="email">
-					<input type="hidden" name="total_bayar" value="<?= $getsum1['grand_total'] ?>">
-					<button class="btnblue" id="prosestran" type="submit"><i class="fa fa-save"></i> Proses Transaksi</button>
-				</form>
-
+				</div>
 
 			</div>
 		</div>
@@ -107,34 +88,68 @@
 
 	</div>
 </div>
-<script type="text/javascript">
-	$(document).ready(function() {
-		var arr = [];
-		$.ajax({
-			url: "getNamaBarang.php",
-			method: "GET",
-		}).then(function(res) {
-			var json = $.parseJSON(res);
-			if (json["res"] == "oke") {
-				var num = json["num"]
-				for (var i = 0; i < num; i++) {
-					// console.log(json["data"][i]["nama_barang"])
-					var result = json["data"][i]["nama_barang"];
-					arr.push(result)
+<script>
+	$(document).ready(() => {
+		$('#dataBarang').load("data_sub_barang.php");
+
+		// function getTotalAjax() {
+
+		// }
+		// getTotalAjax()
+		$('#simpan').click((e) => {
+			e.preventDefault()
+			// var data = $("subt").serialize();
+			var idBarang = document.getElementById('id_barang').value;
+			var jumlahBeli = document.getElementById('jumlah_beli').value;
+			var trx = document.getElementById('trx').value;
 
 
-				}
+			if (idBarang == "") {
+				document.getElementById('err_nama').innerHTML = "Nama Barang Harus Diisi";
+			} else {
+				document.getElementById('err_nama').innerHTML = "";
+			}
 
+			if (jumlahBeli == "") {
+				document.getElementById('err_jumlah').innerHTML = "Jumlah Beli Harus Diisi";
+			} else {
+				document.getElementById('err_jumlah').innerHTML = ""
+			}
+
+			if (idBarang != "" && jumlahBeli != "") {
+				$.ajax({
+					type: 'POST',
+					url: "handler.php?action=tambah_tempo",
+					data: {
+						id_barang: idBarang,
+						jumlah: jumlahBeli,
+						trx: trx,
+					},
+					success: function() {
+						$('#dataBarang').load("data_sub_barang.php");
+						$.ajax({
+							url: "getGrand.php",
+							method: "GET",
+						}).then(function(e) {
+							$("#total_bayar").val(e)
+						})
+						document.getElementById('subt').reset()
+					},
+					error: function() {
+						alert("Terjadi Kesalahan");
+					}
+				})
 			}
 		})
-		console.log(arr);
 	})
-	// $("#nama_barang_auto").keyup(function(e) {
-	// 	e.preventDefault();
-	// 	var namaBarang = $("#nama_barang_auto").val();
-	// 	// console.log(namaBarang)
+</script>
 
-	// })
+<script>
+	$('.chosen').chosen({
+		width: '80%',
+		height: '40%',
+		allow_single_deselect: true
+	});
 </script>
 
 <?php
