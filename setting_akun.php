@@ -1,6 +1,6 @@
 <?php include "head.php" ?>
 <script type="text/javascript">
-	document.title="Setting akun admin";
+	document.title = "Setting akun admin";
 </script>
 <div class="content">
 	<div class="padding">
@@ -10,7 +10,7 @@
 				<span class="label">* silahkan melakukan perubahan username atau password untuk admin.</span>
 				<form class="form-input" method="post" action="handler.php?action=edit_admin" style="padding-top: 30px;">
 					<?php
-					$f=$root->edit_admin();
+					$f = $root->edit_admin();
 					?>
 					<label>Username : </label>
 					<input type="text" name="username" value="<?= $f['username'] ?>">
@@ -19,8 +19,8 @@
 					<label>* Password tidak bisa ditampikan karena terenkripsi</label><br>
 					<label>* Kosongkan form password jika tidak ingin merubah password</label><br><br>
 					<button class="btnblue" type="submit"><i class="fa fa-save"></i> Simpan</button>
-					<a onclick="return confirm('yakin ingin reset akun admin?')" href="handler.php?action=reset_admin" class="btnblue" style="background: #f33155"><i class="fa fa-rotate-left"></i> Reset Akun</a>
-					<a href="home.php" class="btnblue" style="background: #f33155"><i class="fa fa-close"></i> Batal</a>
+					<a onclick="return confirm('yakin ingin reset akun admin?')" href="handler.php?action=reset_admin" class="btnblue" style="background: #f33155"><i class="fas fa-undo"></i></i> Reset Akun</a>
+					<a href="home.php" class="btnblue" style="background: #f33155"><i class="fas fa-times"></i> Batal</a>
 				</form>
 			</div>
 		</div>

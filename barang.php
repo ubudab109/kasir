@@ -4,6 +4,10 @@ if (isset($_GET['action']) && $_GET['action'] == "tambah_barang") {
 	include "tambah_barang.php";
 } else if (isset($_GET['action']) && $_GET['action'] == "edit_barang") {
 	include "edit_barang.php";
+} else if (isset($_GET['action']) && $_GET['action'] == "tambah_diskon") {
+	include "tambah_diskon.php";
+} else if (isset($_GET['action']) && $_GET['action'] == "edit_diskon") {
+	include "edit_diskon.php";
 } else {
 ?>
 	<script type="text/javascript">
@@ -46,6 +50,7 @@ if (isset($_GET['action']) && $_GET['action'] == "tambah_barang") {
 			});
 		});
 	</script>
+
 	<div class="content">
 		<div class="padding">
 			<div class="bgwhite">
@@ -53,7 +58,7 @@ if (isset($_GET['action']) && $_GET['action'] == "tambah_barang") {
 					<div class="contenttop">
 						<div class="left">
 							<a href="?action=tambah_barang" class="btnblue"><i class="fa fa-plus"></i> Tambah Barang</a>
-							<a href="cetak_barang.php" class="btnblue" target="_blank"><i class="fas fa-percent"></i> Tambah Diskon</a>
+							<a href="?action=tambah_diskon" class="btnblue"><i class="fas fa-percentage"></i> Tambah Diskon</a>
 							<a href="cetak_barang.php" class="btnblue" target="_blank"><i class="fa fa-print"></i> Cetak</a>
 						</div>
 						<div class="right">
@@ -79,8 +84,8 @@ if (isset($_GET['action']) && $_GET['action'] == "tambah_barang") {
 								?>
 							</select>
 							<form class="leftin">
-								<input type="search" name="q" placeholder="Cari Barang..." value="<?php echo $keyword = isset($_GET['q']) ? $_GET['q'] : ""; ?>">
-								<button><i class="fa fa-search"></i></button>
+								<input type="text" name="q" id="search" placeholder="Cari Barang...">
+								<!-- <button><i class="fa fa-search"></i></button> -->
 							</form>
 						</div>
 						<div class="both"></div>
@@ -116,7 +121,32 @@ if (isset($_GET['action']) && $_GET['action'] == "tambah_barang") {
 			</div>
 		</div>
 	</div>
+	<script>
+		$("#search").keyup(function() {
+			// Declare variables
+			var input, filter, table, tr, td, i, txtValue;
+			input = document.getElementById("search");
+			filter = input.value.toUpperCase();
+			table = document.getElementById("datatable");
+			tr = table.getElementsByTagName("tr");
 
+			// Loop through all table rows, and hide those who don't match the search query
+			for (i = 0; i < tr.length; i++) {
+				td = tr[i].getElementsByTagName("td")[1];
+				if (td) {
+					txtValue = td.textContent || td.innerText;
+					if (txtValue.toUpperCase().indexOf(filter) > -1) {
+						tr[i].style.display = "";
+					} else {
+						tr[i].style.display = "none";
+					}
+				}
+			}
+		})
+		// function search() {
+
+		// }
+	</script>
 
 <?php
 }

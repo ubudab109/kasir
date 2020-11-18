@@ -20,7 +20,7 @@
 					<h5>Foto Produk</h5>
 					<input type="file" name="foto" id="foto">
 					<button class="btnblue" type="submit"><i class="fa fa-save"></i> Simpan</button>
-					<a href="barang.php" class="btnblue" style="background: #f33155"><i class="fa fa-close"></i> Batal</a>
+					<a href="barang.php" class="btnblue" style="background: #f33155"><i class="fas fa-times"></i> Batal</a>
 				</form>
 			</div>
 		</div>

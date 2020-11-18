@@ -37,7 +37,7 @@
                 <? }?>
                 
                 <td>Rp. <?= number_format($f['total_harga']) ?></td>
-                <td><a class="btn redtbl hapus" data-trx="<?= $f['trx'] ?>" data-sub="<?= $f['id_subtransaksi'] ?>" data-barang="<?= $f['id_barang'] ?>" data-jumlah="<?= $f['jumlah_beli'] ?>"><span class="btn-hapus-tooltip">Cancel</span><i class="fa fa-close"></i></a></td>
+                <td><a class="btn redtbl hapus" data-trx="<?= $f['trx'] ?>" data-sub="<?= $f['id_subtransaksi'] ?>" data-barang="<?= $f['id_barang'] ?>" data-jumlah="<?= $f['jumlah_beli'] ?>"><span class="btn-hapus-tooltip">Cancel</span><i class="fas fa-times"></i></a></td>
             </tr>
         <?php
         }

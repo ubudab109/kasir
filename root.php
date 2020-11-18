@@ -68,6 +68,18 @@ class penjualan
 			}
 		}
 	}
+	// fungsi untuk nambah diskon
+	function tambah_diskon($idBarang, $jumlahDiskon){
+		$query = $this->con->query("INSERT INTO tb_diskon SET jumlah_diskon='$jumlahDiskon', id_barang='$idBarang'");
+		if ($query === TRUE){
+			$this->alert("Berhasil Menambahkan Diskon");
+			$this->redirect("barang.php");
+		}
+		else{
+			$this->alert("Terjadi Kesalahan Silahkan Ulangi Kembali");
+			$this->redirect("barang.php");
+		}
+	}
 	function tambah_barang($nama_barang, $stok, $harga_beli, $harga_jual, $id_kategori, $file)
 	{
 		$query = $this->con->query("select * from barang where nama_barang='$nama_barang'");
@@ -150,13 +162,15 @@ class penjualan
                     if ($dataDiskon->num_rows > 0){ 
                     	$fetch = $dataDiskon->fetch_assoc();
                     ?>
-                    <td><?= $fetch['jumlah_diskon'] ?>%</td>
+                    <td><?= $fetch['jumlah_diskon'] ?>% <span>
+					<a href="?action=edit_diskon&id_barang=<?= $fetch['id_barang'] ?>" class="btn bluetbl m-r-10"><span class="btn-edit-tooltip">Edit Diskon</span><i class="fas fa-pencil-alt"></i></a>
+					</span></td>
 					<?   } else{ ?>
 						<td>Tidak Ada Diskon</td>
 					<? }?>
 					<td><?= date("d-m-Y", strtotime($data['date_added'])) ?></td>
 					<td>
-						<a href="?action=edit_barang&id_barang=<?= $data['id_barang'] ?>" class="btn bluetbl m-r-10"><span class="btn-edit-tooltip">Edit</span><i class="fa fa-pencil"></i></a>
+						<a href="?action=edit_barang&id_barang=<?= $data['id_barang'] ?>" class="btn bluetbl m-r-10"><span class="btn-edit-tooltip">Edit</span><i class="fas fa-pencil-alt"></i></a>
 						<a href="handler.php?action=hapus_barang&id_barang=<?= $data['id_barang'] ?>" class="btn redtbl" onclick="return confirm('yakin ingin menghapus <?= $data['nama_barang'] . " (id : " . $data['id_barang'] ?>) ?')"><span class="btn-hapus-tooltip">Hapus</span><i class="fa fa-trash"></i></a>
 						
 					</td>
@@ -215,6 +229,17 @@ class penjualan
 					<td><?= $data['stok'] ?></td>
 					<td>Rp. <?= number_format($data['harga_beli']) ?></td>
 					<td>Rp. <?= number_format($data['harga_jual']) ?></td>
+					<?php 
+                    $dataDiskon = $this->con->query("SELECT * FROM tb_diskon WHERE id_barang = '$data[id_barang]'");
+                    if ($dataDiskon->num_rows > 0){ 
+                    	$fetch = $dataDiskon->fetch_assoc();
+                    ?>
+                    <td><?= $fetch['jumlah_diskon'] ?>% <span>
+					<a href="?action=edit_diskon&id_barang=<?= $fetch['id_barang'] ?>" class="btn bluetbl m-r-10"><span class="btn-edit-tooltip">Edit Diskon</span><i class="fas fa-pencil-alt"></i></a>
+					</span></td>
+					<?   } else{ ?>
+						<td>Tidak Ada Diskon</td>
+					<? }?>
 					<td><?= date("d-m-Y", strtotime($data['date_added'])) ?></td>
 					<td>
 						<a href="?action=edit_barang&id_barang=<?= $data['id_barang'] ?>" class="btn bluetbl m-r-10"><span class="btn-edit-tooltip">Edit</span><i class="fa fa-pencil"></i></a>
@@ -239,7 +264,7 @@ class penjualan
 				<td><?= $no ?></td>
 				<td><?= $data['nama_kategori'] ?></td>
 				<td>
-					<a href="?action=edit_kategori&id_kategori=<?= $data['id_kategori'] ?>" class="btn bluetbl m-r-10"><span class="btn-edit-tooltip">Edit</span><i class="fa fa-pencil"></i></a>
+					<a href="?action=edit_kategori&id_kategori=<?= $data['id_kategori'] ?>" class="btn bluetbl m-r-10"><span class="btn-edit-tooltip">Edit</span><i class="fas fa-pencil-alt"></i></a>
 					<a href="handler.php?action=hapus_kategori&id_kategori=<?= $data['id_kategori'] ?>" class="btn redtbl" onclick="return confirm('yakin ingin menghapus kategori : <?= $data['nama_kategori'] ?> ?')"><span class="btn-hapus-tooltip">Hapus</span><i class="fa fa-trash"></i></a>
 				</td>
 			</tr>
@@ -283,7 +308,7 @@ class penjualan
 				<td>Kasir</td>
 				<td><?= date("d-m-Y", strtotime($data['date_created'])) ?></td>
 				<td>
-					<a href="?action=edit_kasir&id_kasir=<?= $data['id'] ?>" class="btn bluetbl m-r-10"><span class="btn-edit-tooltip">Edit</span><i class="fa fa-pencil"></i></a>
+					<a href="?action=edit_kasir&id_kasir=<?= $data['id'] ?>" class="btn bluetbl m-r-10"><span class="btn-edit-tooltip">Edit</span><i class="fas fa-pencil-alt"></i></a>
 					<a href="handler.php?action=hapus_user&id_user=<?= $data['id'] ?>" class="btn redtbl" onclick="return confirm('yakin ingin menghapus user : <?= $data['username'] ?> ?')"><span class="btn-hapus-tooltip">Hapus</span><i class="fa fa-trash"></i></a>
 				</td>
 			</tr>
@@ -409,6 +434,11 @@ class penjualan
 	function edit_kasir($id_kasir)
 	{
 		$query = $this->con->query("select * from user where id='$id_kasir'");
+		$data = $query->fetch_assoc();
+		return $data;
+	}
+	function edit_diskon($id_barang){
+		$query = $this->con->query("SELECT * FROM tb_diskon WHERE id_barang='$id_barang'");
 		$data = $query->fetch_assoc();
 		return $data;
 	}

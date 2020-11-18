@@ -113,6 +113,24 @@ if (isset($_GET['action'])) {
 			$root->redirect("laporan.php");
 		}
 	}
+	if ($action == "tambah_diskon") {
+		$root->tambah_diskon($_POST['id_barang'], $_POST['jumlah_diskon']);
+	}
+	if ($action == "edit_diskon") {
+		if (empty($_POST['jumlah_diskon'])) {
+			$query = $root->con->query("DELETE FROM tb_diskon WHERE id_barang='$_POST[id_barang]'");
+		} else {
+			$query = $root->con->query("UPDATE tb_diskon SET jumlah_diskon='$_POST[jumlah_diskon]' WHERE id_barang='$_POST[id_barang]'");
+		}
+
+		if ($query === TRUE) {
+			$root->alert("Diskon Berhasil Diubah");
+			$root->redirect("barang.php");
+		} else {
+			$root->alert("Terjadi Kesalahan");
+			$root->go_back();
+		}
+	}
 } else {
 	echo "no direct script are allowed";
 }

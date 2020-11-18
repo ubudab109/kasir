@@ -22,6 +22,7 @@ if (!isset($_SESSION['username'])) {
 	<script type="text/javascript" src="assets/choosen/chosen.jquery.min.js"></script>
 	<script type="text/javascript" src="assets/choosen/chosen.proto.min.js"></script>
 	<script type="text/javascript" src="assets/jquery-ui/jquery-ui.js"></script>
+	<script type="text/javascript" src="assets/validate.min.js"></script>
 </head>
 
 <body>
@@ -45,18 +46,18 @@ if (!isset($_SESSION['username'])) {
 				?>
 					<li><a href="setting_akun.php"><i class="fa fa-cog"></i> Pengaturan Akun</a></li>
 				<?php } ?>
-				<li><a href="handler.php?action=logout"><i class="fa fa-sign-out"></i> Logout</a></li>
+				<li><a href="handler.php?action=logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
 			<?php
 			} else {
 			?>
-				<li><a id="transaksi" href="transaksi.php"><i class="fa fa-money"></i> Transaksi</a></li>
-				<li><a id="laporan-transaksi" href="#"><i class="fa fa-money"></i> Laporan Transaksi</a></li>
+				<li><a id="transaksi" href="transaksi.php"><i class="fas fa-money-check"></i> Transaksi</a></li>
+				<li><a id="laporan-transaksi" href="#"><i class="fa fa-book"></i> Laporan Transaksi</a></li>
 				<?php
 				if ($_SESSION['status'] == 1) {
 				?>
 					<li><a href="setting_akun.php"><i class="fa fa-cog"></i> Pengaturan Akun</a></li>
 				<?php } ?>
-				<li><a href="handler.php?action=logout"><i class="fa fa-sign-out"></i> Logout</a></li>
+				<li><a href="handler.php?action=logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
 			<?php
 			}
 			?>
