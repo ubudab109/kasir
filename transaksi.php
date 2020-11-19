@@ -28,7 +28,7 @@ if (isset($_GET['action']) && $_GET['action'] == "transaksi_baru") {
 								<th>Tanggal Transaksi</th>
 								<th>Total Bayar</th>
 								<th>Nama Pembeli</th>
-								<th>Email Pembeli</th>
+								<th>Nomor HP Pembeli</th>
 								<th>No Invoice</th>
 								<th>Aksi</th>
 							</tr>

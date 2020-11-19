@@ -51,7 +51,7 @@ if (!isset($_SESSION['username'])) {
 			} else {
 			?>
 				<li><a id="transaksi" href="transaksi.php"><i class="fas fa-money-check"></i> Transaksi</a></li>
-				<li><a id="laporan-transaksi" href="#"><i class="fa fa-book"></i> Laporan Transaksi</a></li>
+				<li><a id="laporan_transaksi" href="laporan_transaksi.php"><i class="fa fa-book"></i> Laporan Transaksi Kasir</a></li>
 				<?php
 				if ($_SESSION['status'] == 1) {
 				?>

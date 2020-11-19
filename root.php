@@ -37,6 +37,15 @@ class penjualan
 		</script>
 		<?php
 	}
+	function base_url()
+	{
+		return sprintf(
+			"%s://%s%s",
+			isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' ? 'https' : 'http',
+			$_SERVER['SERVER_NAME'],
+			$_SERVER['REQUEST_URI']
+		);
+	}
 	function login($username, $password, $loginas)
 	{
 		if (trim($username) == "") {
@@ -69,15 +78,104 @@ class penjualan
 		}
 	}
 	// fungsi untuk nambah diskon
-	function tambah_diskon($idBarang, $jumlahDiskon){
-		$query = $this->con->query("INSERT INTO tb_diskon SET jumlah_diskon='$jumlahDiskon', id_barang='$idBarang'");
-		if ($query === TRUE){
-			$this->alert("Berhasil Menambahkan Diskon");
+	function tambah_diskon($idBarang, $jumlahDiskon)
+	{
+		$queryPotongan = $this->con->query("SELECT * FROM tb_potongan WHERE id_barang='$idBarang'");
+		$dataPotongan = $queryPotongan->fetch_assoc();
+		// $barang_id = $dataPotongan['']
+		if ($queryPotongan->num_rows > 0) {
+			$this->alert("Harga Barang Sudah Dipotong'$dataPotongan[jumlah_potongan]' Silahkan Hapus Terlebih Dahulu");
 			$this->redirect("barang.php");
+		} else {
+			$query = $this->con->query("INSERT INTO tb_diskon SET jumlah_diskon='$jumlahDiskon', id_barang='$idBarang'");
+
+			if ($query === TRUE) {
+				$this->alert("Berhasil Menambahkan Diskon");
+				$this->redirect("barang.php");
+			} else {
+				$this->alert("Barang Sudah Diberikan Diskon Sebelumnya. Silahkan Ubah Atau Hapus Terlebih Dahulu");
+				$this->redirect("barang.php");
+			}
 		}
-		else{
-			$this->alert("Terjadi Kesalahan Silahkan Ulangi Kembali");
+	}
+	// fungsi untuk nambah potongan admin
+	function tambah_potongan($idBarang, $jumlahDiskon)
+	{
+		$queryDiskon = $this->con->query("SELECT * FROM tb_diskon WHERE id_barang='$idBarang'");
+		$dataDiskon = $queryDiskon->fetch_assoc();
+		if ($queryDiskon->num_rows > 0) {
+			$this->alert("Harga Barang Sudah Ada Diskon '$dataDiskon[jumlah_diskon]'% Silahkan Hapus Terlebih Dahulu");
 			$this->redirect("barang.php");
+		} else {
+			$query = $this->con->query("INSERT INTO tb_potongan SET jumlah_potongan='$jumlahDiskon', id_barang='$idBarang'");
+			if ($query === TRUE) {
+				$this->alert("Berhasil Menambahkan Potongan");
+				$this->redirect("barang.php");
+			} else {
+				$this->alert("Terjadi Kesalahan Silahkan Ulangi Kembali");
+				$this->redirect("barang.php");
+			}
+		}
+	}
+	// fungsi untuk nambah potongan kasir
+	function tambah_potongan_kasir($idBarang, $jumlahPotongan)
+	{
+		$query = $this->con->query("INSERT INTO tb_potongan SET jumlah_potongan='$jumlahPotongan', id_barang='$idBarang'");
+		$quDiskon = $this->con->query("SELECT * FROM tb_potongan WHERE id_barang='$idBarang'");
+		$q1 = $this->con->query("select * from barang where id_barang='$idBarang'");
+		$data = $q1->fetch_assoc();
+		if ($query === TRUE) {
+			$q = $this->con->query("select * from tempo where id_barang='$idBarang'");
+			if ($q->num_rows > 0) {
+				$ubah = $q->fetch_assoc();
+				$jumbel = $ubah['jumlah_beli'];
+				if ($quDiskon->num_rows > 0) {
+					$fetch = $quDiskon->fetch_assoc();
+					$jumlahDiskon = $fetch['jumlah_potongan'];
+					// $totalDiskon = $jumlahDiskon / 100;
+					$total_diskon = ($jumbel * $data['harga_jual']) - $jumlahDiskon;
+					// $total_harga = ($jumbel * $data['harga_jual']) - $total_diskon;
+					$this->con->query("UPDATE tempo SET total_harga=$total_diskon WHERE id_barang='$idBarang'");
+				} else {
+					$this->alert("Terjadi Kesalahan");
+				}
+			}
+			$hasil = 0;
+		} else {
+			$hasil = 1;
+		}
+		return $hasil;
+	}
+
+	// fungsi untuk nambah diskon kasir
+	function tambah_diskon_kasir($idBarang, $jumlahDiskon)
+	{
+		$query = $this->con->query("INSERT INTO tb_diskon SET jumlah_diskon='$jumlahDiskon', id_barang='$idBarang'");
+		$quDiskon = $this->con->query("SELECT * FROM tb_diskon WHERE id_barang='$idBarang'");
+		$q1 = $this->con->query("select * from barang where id_barang='$idBarang'");
+		$data = $q1->fetch_assoc();
+
+		if ($query === TRUE) {
+			$q = $this->con->query("select * from tempo where id_barang='$idBarang'");
+			if ($q->num_rows > 0) {
+				$ubah = $q->fetch_assoc();
+				$jumbel = $ubah['jumlah_beli'];
+				if ($quDiskon->num_rows > 0) {
+					$fetch = $quDiskon->fetch_assoc();
+					$jumlahDiskon = $fetch['jumlah_diskon'];
+					$totalDiskon = $jumlahDiskon / 100;
+					$total_diskon = ($jumbel * $data['harga_jual']) * $totalDiskon;
+					$total_harga = ($jumbel * $data['harga_jual']) - $total_diskon;
+					$this->con->query("UPDATE tempo SET total_harga=$total_harga WHERE id_barang='$idBarang'");
+				} else {
+					$this->alert("Terjadi Kesalahan");
+				}
+				return 0;
+			} else {
+				return 1;
+				// $this->alert("Terjadi Kesalahan");
+			}
+			// return $hasil;
 		}
 	}
 	function tambah_barang($nama_barang, $stok, $harga_beli, $harga_jual, $id_kategori, $file)
@@ -157,22 +255,35 @@ class penjualan
 					<td><?= $data['stok'] ?></td>
 					<td>Rp. <?= number_format($data['harga_beli']) ?></td>
 					<td>Rp. <?= number_format($data['harga_jual']) ?></td>
-					<?php 
-                    $dataDiskon = $this->con->query("SELECT * FROM tb_diskon WHERE id_barang = '$data[id_barang]'");
-                    if ($dataDiskon->num_rows > 0){ 
-                    	$fetch = $dataDiskon->fetch_assoc();
-                    ?>
-                    <td><?= $fetch['jumlah_diskon'] ?>% <span>
-					<a href="?action=edit_diskon&id_barang=<?= $fetch['id_barang'] ?>" class="btn bluetbl m-r-10"><span class="btn-edit-tooltip">Edit Diskon</span><i class="fas fa-pencil-alt"></i></a>
-					</span></td>
-					<?   } else{ ?>
-						<td>Tidak Ada Diskon</td>
-					<? }?>
+					<?php
+					$dataDiskon = $this->con->query("SELECT * FROM tb_diskon WHERE id_barang = '$data[id_barang]'");
+					if ($dataDiskon->num_rows > 0) {
+						$fetch = $dataDiskon->fetch_assoc();
+					?>
+						<td class="text-center"><?= $fetch['jumlah_diskon'] ?>%<span>
+								<a href="?action=edit_diskon&id_barang=<?= $fetch['id_barang'] ?>" class="btn bluetbl m-r-10"><span class="btn-edit-tooltip">Edit Diskon</span><i class="fas fa-pencil-alt"></i></a>
+							</span></td>
+					<?php   } else { ?>
+						<td class="text-center">
+							<?php
+							$dataPotongan = $this->con->query("SELECT * FROM tb_potongan WHERE id_barang = '$data[id_barang]'");
+							if ($dataPotongan->num_rows > 0) {
+								$fetch = $dataPotongan->fetch_assoc();
+							?>
+								Rp. <?= number_format($fetch['jumlah_potongan']) ?><span>
+									<a href="?action=edit_potongan&id_barang=<?= $fetch['id_barang'] ?>" class="btn bluetbl m-r-10"><span class="btn-edit-tooltip">Edit Potongan</span><i class="fas fa-pencil-alt"></i></a>
+								</span>
+
+							<?php } else { ?>
+								Tidak ada Diskon ataupun Potongan
+							<?php } ?>
+						</td>
+					<?php } ?>
 					<td><?= date("d-m-Y", strtotime($data['date_added'])) ?></td>
 					<td>
 						<a href="?action=edit_barang&id_barang=<?= $data['id_barang'] ?>" class="btn bluetbl m-r-10"><span class="btn-edit-tooltip">Edit</span><i class="fas fa-pencil-alt"></i></a>
 						<a href="handler.php?action=hapus_barang&id_barang=<?= $data['id_barang'] ?>" class="btn redtbl" onclick="return confirm('yakin ingin menghapus <?= $data['nama_barang'] . " (id : " . $data['id_barang'] ?>) ?')"><span class="btn-hapus-tooltip">Hapus</span><i class="fa fa-trash"></i></a>
-						
+
 					</td>
 				</tr>
 			<?php
@@ -229,17 +340,17 @@ class penjualan
 					<td><?= $data['stok'] ?></td>
 					<td>Rp. <?= number_format($data['harga_beli']) ?></td>
 					<td>Rp. <?= number_format($data['harga_jual']) ?></td>
-					<?php 
-                    $dataDiskon = $this->con->query("SELECT * FROM tb_diskon WHERE id_barang = '$data[id_barang]'");
-                    if ($dataDiskon->num_rows > 0){ 
-                    	$fetch = $dataDiskon->fetch_assoc();
-                    ?>
-                    <td><?= $fetch['jumlah_diskon'] ?>% <span>
-					<a href="?action=edit_diskon&id_barang=<?= $fetch['id_barang'] ?>" class="btn bluetbl m-r-10"><span class="btn-edit-tooltip">Edit Diskon</span><i class="fas fa-pencil-alt"></i></a>
-					</span></td>
-					<?   } else{ ?>
+					<?php
+					$dataDiskon = $this->con->query("SELECT * FROM tb_diskon WHERE id_barang = '$data[id_barang]'");
+					if ($dataDiskon->num_rows > 0) {
+						$fetch = $dataDiskon->fetch_assoc();
+					?>
+						<td><?= $fetch['jumlah_diskon'] ?>% <span>
+								<a href="?action=edit_diskon&id_barang=<?= $fetch['id_barang'] ?>" class="btn bluetbl m-r-10"><span class="btn-edit-tooltip">Edit Diskon</span><i class="fas fa-pencil-alt"></i></a>
+							</span></td>
+					<?php   } else { ?>
 						<td>Tidak Ada Diskon</td>
-					<? }?>
+					<?php } ?>
 					<td><?= date("d-m-Y", strtotime($data['date_added'])) ?></td>
 					<td>
 						<a href="?action=edit_barang&id_barang=<?= $data['id_barang'] ?>" class="btn bluetbl m-r-10"><span class="btn-edit-tooltip">Edit</span><i class="fa fa-pencil"></i></a>
@@ -314,6 +425,60 @@ class penjualan
 			</tr>
 		<?php
 			$no++;
+		}
+	}
+	// tampil laporan transaksi kasir
+	function tampil_laporan_kasir($id)
+	{
+		$query = $this->con->query("SELECT transaksi.id_transaksi,transaksi.kode_kasir, transaksi.tgl_transaksi,transaksi.no_invoice,transaksi.total_bayar,transaksi.nama_pembeli FROM transaksi WHERE transaksi.kode_kasir='$id' ORDER BY transaksi.id_transaksi DESC");
+		// var_dump($id);
+		$no = 1;
+		while ($f = $query->fetch_assoc()) {
+		?>
+			<tr>
+				<td><?= $no++ ?></td>
+				<td><?= $f['no_invoice'] ?></td>
+				<td><?= $_SESSION['username'] ?></td>
+				<td><?= $f['nama_pembeli'] ?></td>
+				<td><?= date("d-m-Y", strtotime($f['tgl_transaksi'])) ?></td>
+				<td>Rp. <?= number_format($f['total_bayar']) ?></td>
+				<td>
+					<a href="?action=detail_transaksi&id_transaksi=<?= $f['id_transaksi'] ?>" class="btn bluetbl m-r-10"><span class="btn-edit-tooltip">Lihat</span><i class="fa fa-eye"></i></a>
+					<a onclick="return confirm('yakin ingin menghapus <?= $f['no_invoice'] . " (id : " . $f['id_transaksi'] ?>) ?')" href="handler.php?action=delete_transaksi&id=<?= $f['id_transaksi'] ?>" class="btn redtbl"><span class="btn-hapus-tooltip">Hapus</span><i class="fa fa-trash"></i></a>
+				</td>
+			</tr>
+		<?php
+		}
+	}
+	// filter laporan transaksi kasir
+	function filter_tampil_laporan_kasir($tanggal, $aksi, $id)
+	{
+		if ($aksi == 1) {
+			$split1 = explode('-', $tanggal);
+			$tanggal = $split1[2] . "-" . $split1[1] . "-" . $split1[0];
+			$query = $this->con->query("select transaksi.id_transaksi,transaksi.tgl_transaksi,transaksi.no_invoice,transaksi.total_bayar,transaksi.nama_pembeli,user.username from transaksi inner join user on transaksi.kode_kasir=user.id where transaksi.tgl_transaksi like '%$tanggal%' AND kode_kasir='$id' order by transaksi.id_transaksi desc");
+		} else {
+			$split1 = explode('-', $tanggal);
+			$tanggal = $split1[1] . "-" . $split1[0];
+			$query = $this->con->query("select transaksi.id_transaksi,transaksi.tgl_transaksi,transaksi.no_invoice,transaksi.total_bayar,transaksi.nama_pembeli,user.username from transaksi inner join user on transaksi.kode_kasir=user.id where transaksi.tgl_transaksi like '%$tanggal%' AND kode_kasir='$id' order by transaksi.id_transaksi desc");
+		}
+
+		$no = 1;
+		while ($f = $query->fetch_assoc()) {
+		?>
+			<tr>
+				<td><?= $no++ ?></td>
+				<td><?= $f['no_invoice'] ?></td>
+				<td><?= $f['username'] ?></td>
+				<td><?= $f['nama_pembeli'] ?></td>
+				<td><?= date("d-m-Y", strtotime($f['tgl_transaksi'])) ?></td>
+				<td>Rp. <?= number_format($f['total_bayar']) ?></td>
+				<td>
+					<a href="?action=detail_transaksi&id_transaksi=<?= $f['id_transaksi'] ?>" class="btn bluetbl m-r-10"><span class="btn-edit-tooltip">Lihat</span><i class="fa fa-eye"></i></a>
+					<a onclick="return confirm('yakin ingin menghapus <?= $f['no_invoice'] . " (id : " . $f['id_transaksi'] ?>) ?')" href="handler.php?action=delete_transaksi&id=<?= $f['id_transaksi'] ?>" class="btn redtbl"><span class="btn-hapus-tooltip">Hapus</span><i class="fa fa-trash"></i></a>
+				</td>
+			</tr>
+		<?php
 		}
 	}
 	function tampil_laporan()
@@ -437,8 +602,15 @@ class penjualan
 		$data = $query->fetch_assoc();
 		return $data;
 	}
-	function edit_diskon($id_barang){
+	function edit_diskon($id_barang)
+	{
 		$query = $this->con->query("SELECT * FROM tb_diskon WHERE id_barang='$id_barang'");
+		$data = $query->fetch_assoc();
+		return $data;
+	}
+	function edit_potongan($id_barang)
+	{
+		$query = $this->con->query("SELECT * FROM tb_potongan WHERE id_barang='$id_barang'");
 		$data = $query->fetch_assoc();
 		return $data;
 	}
@@ -459,14 +631,14 @@ class penjualan
 			$this->redirect("kategori.php");
 		}
 	}
-	function aksi_edit_barang($id_barang, $nama_barang, $stok, $harga_beli, $harga_jual, $id_kategori)
+	function aksi_edit_barang($id_barang, $nama_barang, $stok, $harga_beli, $harga_jual, $id_kategori, $file)
 	{
-		$query = $this->con->query("update barang set nama_barang='$nama_barang',stok='$stok',harga_beli='$harga_beli',harga_jual='$harga_jual',id_kategori='$id_kategori',date_added=date_added where id_barang='$id_barang'");
+		$query = $this->con->query("update barang set nama_barang='$nama_barang',stok='$stok',harga_beli='$harga_beli',harga_jual='$harga_jual',id_kategori='$id_kategori',date_added=date_added ,foto_produk='$file' where id_barang='$id_barang'");
 		if ($query === TRUE) {
 			$this->alert("Barang berhasil di update");
 			$this->redirect("barang.php");
 		} else {
-			$this->alert("Barang gagal di update");
+			$this->alert("Barang gagal di update (Nama Barang Sudah Ada)");
 			$this->redirect("barang.php");
 		}
 	}

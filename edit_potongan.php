@@ -6,28 +6,25 @@
     <div class="padding">
         <div class="bgwhite">
             <div class="padding">
-                <h3 class="jdl">Tambah Diskon Barang</h3>
-                <form class="form-input" id="myform" method="post" action="handler.php?action=tambah_diskon">
+                <h3 class="jdl">Tambah Barang</h3>
+                <form class="form-input" id="myform" method="post" action="handler.php?action=edit_potongan">
                     <div class="form-grop">
-                        <label for="id_barang"> Pilih Barang :</label>
+                        <?php $f = $root->edit_potongan($_GET['id_barang']) ?>
+                        <?php $barang = $root->con->query("SELECT nama_barang FROM barang WHERE id_barang = '$_GET[id_barang]'");
+                        $data = $barang->fetch_assoc();
+                        ?>
+                        <label for="id_barang"> Nama Barang :</label>
                         <br>
-                        <select style="width: 372px;cursor: pointer;" required="required" class="form-control chosen" id="id_barang" name="id_barang">
-                            <?php
-
-                            $data = $root->con->query("select * from barang");
-                            while ($f = $data->fetch_assoc()) {
-                                echo "<option value='$f[id_barang]'>$f[nama_barang] (stock : $f[stok] | Harga : " . number_format($f['harga_jual']) . ")</option>";
-                            }
-                            ?>
-                        </select>
+                        <input type="text" id="nama_barang" value="<?= $data['nama_barang'] ?>" readonly disabled>
+                        <input type="hidden" name="id_barang" id="id_barang" readonly value="<?= $f['id_barang'] ?>">
                     </div>
                     <br>
                     <!-- <div class="form-group"> -->
                     <div class="inner-addon right-addon">
                         <!-- <i class="glyphicon glyphicon-user"></i>
                             <input type="text" class="form-control" /> -->
-                        <label for="jumlah_diskon">Masukkan Jumlah Diskon</label>
-                        <input type="text" name="jumlah_diskon" placeholder="Contoh : 10 atau 20 Tanpa Masukkan %" id="jumlah_diskon" class="form-control">
+                        <label for="jumlah_potongan">Masukkan Jumlah Potongan (Kosongkan Jika Ingin Menghapus Potongan)</label>
+                        <input type="text" name="jumlah_potongan" value="<?= $f['jumlah_potongan'] ?>" placeholder="Contoh : 10 atau 10.2 Tanpa Masukkan %" id="jumlah_potongan" class="form-control">
                         <!-- <i class="fas fa-percentage"></i> -->
                         <!-- </div> -->
 
@@ -42,21 +39,13 @@
     </div>
 </div>
 <script>
-    $('.chosen').chosen({
-        width: '80%',
-        height: '40%',
-        allow_single_deselect: true
-    });
-
     $("#myform").validate({
         rules: {
             jumlah_diskon: {
-                required: true,
                 number: true
             }
         },
         messages: {
-            required: "Jumlah Diskon Harus Diisi",
             number: "Harus Berupa Angka Bulat atau Desimal"
         }
     });

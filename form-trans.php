@@ -7,9 +7,9 @@ $getsum1 = $getsum->fetch_assoc();
 ?>
 <form class="form-input" action="handler.php?action=selesai_transaksi" method="post">
     <label>Nama Pembeli :</label>
-    <input required="required" type="text" id="nama_pembeli" name="nama_pembeli">
+    <input type="text" id="nama_pembeli" name="nama_pembeli">
     <input type="hidden" id="total_bayar" name="total_bayar" value="<?= $getsum1['grand_total'] ?>">
-    <label>Email :</label>
-    <input type="email" name="email" id="email_pembeli">
+    <label>Nomor HP :</label>
+    <input type="number" name="email" id="email_pembeli">
     <button class="btnblue" id="prosestran" type="submit"><i class="fa fa-save"></i> Proses Transaksi</button>
 </form>

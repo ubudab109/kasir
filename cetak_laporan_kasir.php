@@ -33,16 +33,17 @@ class PDF extends FPDF
     }
     function data_barang()
     {
+        session_start();
         $con = mysqli_connect("localhost", "root", "", "tekno");
         $tanggal = $_POST['tgl_laporan'];
         if ($_POST['jenis_laporan'] == "perhari") {
             $split1 = explode('-', $tanggal);
             $tanggal = $split1[2] . "-" . $split1[1] . "-" . $split1[0];
-            $query = mysqli_query($con, "select transaksi.id_transaksi,transaksi.tgl_transaksi,transaksi.no_invoice,transaksi.total_bayar,transaksi.nama_pembeli,user.username from transaksi inner join user on transaksi.kode_kasir=user.id where transaksi.tgl_transaksi like '%$tanggal%' order by transaksi.id_transaksi desc");
+            $query = mysqli_query($con, "select transaksi.id_transaksi,transaksi.tgl_transaksi,transaksi.no_invoice,transaksi.total_bayar,transaksi.nama_pembeli,user.username from transaksi inner join user on transaksi.kode_kasir=user.id where transaksi.tgl_transaksi like '%$tanggal%' AND transaksi.kode_kasir='$_SESSION[id]' order by transaksi.id_transaksi desc");
         } else {
             $split1 = explode('-', $tanggal);
             $tanggal = $split1[1] . "-" . $split1[0];
-            $query = mysqli_query($con, "select transaksi.id_transaksi,transaksi.tgl_transaksi,transaksi.no_invoice,transaksi.total_bayar,transaksi.nama_pembeli,user.username from transaksi inner join user on transaksi.kode_kasir=user.id where transaksi.tgl_transaksi like '%$tanggal%' order by transaksi.id_transaksi desc");
+            $query = mysqli_query($con, "select transaksi.id_transaksi,transaksi.tgl_transaksi,transaksi.no_invoice,transaksi.total_bayar,transaksi.nama_pembeli,user.username from transaksi inner join user on transaksi.kode_kasir=user.id where transaksi.tgl_transaksi like '%$tanggal%' AND transaksi.kode_kasir='$_SESSION[id]' order by transaksi.id_transaksi desc");
         }
         while ($r =  mysqli_fetch_array($query)) {
             $hasil[] = $r;
@@ -75,7 +76,7 @@ class PDF extends FPDF
 }
 
 $pdf = new PDF();
-$pdf->SetTitle('Cetak Laporan Keuangan');
+$pdf->SetTitle('Cetak Laporan Keuangan Kasir');
 
 $data = $pdf->data_barang();
 

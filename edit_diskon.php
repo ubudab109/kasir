@@ -55,7 +55,7 @@
                     <div class="inner-addon right-addon">
                         <!-- <i class="glyphicon glyphicon-user"></i>
                             <input type="text" class="form-control" /> -->
-                        <label for="jumlah_diskon">Masukkan Jumlah Diskon (Kosongkan Jika Tidak Input Diskon)</label>
+                        <label for="jumlah_diskon">Masukkan Jumlah Diskon (Kosongkan Jika Ingin Menghapus Diskon)</label>
                         <input type="text" name="jumlah_diskon" value="<?= $f['jumlah_diskon'] ?>" placeholder="Contoh : 10 atau 10.2 Tanpa Masukkan %" id="jumlah_diskon" class="form-control">
                         <!-- <i class="fas fa-percentage"></i> -->
                         <!-- </div> -->
@@ -73,7 +73,7 @@
 <script>
     $("#myform").validate({
         rules: {
-            jumlah_diskon: {
+            jumlah_potongan: {
                 number: true
             }
         },

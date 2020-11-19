@@ -6,8 +6,12 @@ if (isset($_GET['action']) && $_GET['action'] == "tambah_barang") {
 	include "edit_barang.php";
 } else if (isset($_GET['action']) && $_GET['action'] == "tambah_diskon") {
 	include "tambah_diskon.php";
+} else if (isset($_GET['action']) && $_GET['action'] == "tambah_potongan") {
+	include "tambah_potongan.php";
 } else if (isset($_GET['action']) && $_GET['action'] == "edit_diskon") {
 	include "edit_diskon.php";
+} else if (isset($_GET['action']) && $_GET['action'] == "edit_potongan") {
+	include "edit_potongan.php";
 } else {
 ?>
 	<script type="text/javascript">
@@ -59,6 +63,7 @@ if (isset($_GET['action']) && $_GET['action'] == "tambah_barang") {
 						<div class="left">
 							<a href="?action=tambah_barang" class="btnblue"><i class="fa fa-plus"></i> Tambah Barang</a>
 							<a href="?action=tambah_diskon" class="btnblue"><i class="fas fa-percentage"></i> Tambah Diskon</a>
+							<a href="?action=tambah_potongan" class="btnblue"><i class="fas fa-percentage"></i> Tambah Potongan</a>
 							<a href="cetak_barang.php" class="btnblue" target="_blank"><i class="fa fa-print"></i> Cetak</a>
 						</div>
 						<div class="right">

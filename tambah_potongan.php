@@ -6,8 +6,8 @@
     <div class="padding">
         <div class="bgwhite">
             <div class="padding">
-                <h3 class="jdl">Tambah Diskon Barang</h3>
-                <form class="form-input" id="myform" method="post" action="handler.php?action=tambah_diskon">
+                <h3 class="jdl">Tambah Potongan Barang</h3>
+                <form class="form-input" id="myform" method="post" action="handler.php?action=tambah_potongan">
                     <div class="form-grop">
                         <label for="id_barang"> Pilih Barang :</label>
                         <br>
@@ -26,8 +26,8 @@
                     <div class="inner-addon right-addon">
                         <!-- <i class="glyphicon glyphicon-user"></i>
                             <input type="text" class="form-control" /> -->
-                        <label for="jumlah_diskon">Masukkan Jumlah Diskon</label>
-                        <input type="text" name="jumlah_diskon" placeholder="Contoh : 10 atau 20 Tanpa Masukkan %" id="jumlah_diskon" class="form-control">
+                        <label for="jumlah_potongan">Masukkan Jumlah Potongan</label>
+                        <input type="number" name="jumlah_potongan" placeholder="Contoh : 10000 atau 25000" id="jumlah_potongan" class="form-control">
                         <!-- <i class="fas fa-percentage"></i> -->
                         <!-- </div> -->
 

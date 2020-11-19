@@ -51,7 +51,28 @@ if (isset($_GET['action'])) {
 		$root->hapus_barang($_GET['id_barang']);
 	}
 	if ($action == "edit_barang") {
-		$root->aksi_edit_barang($_POST['id_barang'], $_POST['nama_barang'], $_POST['stok'], $_POST['harga_beli'], $_POST['harga_jual'], $_POST['kategori']);
+		$rand = rand();
+		$ekstensi = array('png', 'jpg', 'jpeg', 'gif');
+		$filename = $_FILES['foto']['name'];
+		$ukuran = $_FILES['foto']['size'];
+		$ext = pathinfo($filename, PATHINFO_EXTENSION);
+		$file = $rand . '-' . $filename;
+		if (is_uploaded_file($_FILES['foto']['tmp_name'])) {
+			if (!in_array($ext, $ekstensi)) {
+				$this->alert("Format harus JPEG, JPG atau PNG");
+				$this->go_back();
+			} else {
+				if ($ukuran < 2044070) {
+					move_uploaded_file($_FILES['foto']['tmp_name'], 'images/produk/' . $file);
+					$root->aksi_edit_barang($_POST['id_barang'], $_POST['nama_barang'], $_POST['stok'], $_POST['harga_beli'], $_POST['harga_jual'], $_POST['kategori'], $file);
+				} else {
+					$this->alert("Maksimal Foto : 2 MegaByte");
+					$this->go_back();
+				}
+			}
+		} else {
+			$root->aksi_edit_barang($_POST['id_barang'], $_POST['nama_barang'], $_POST['stok'], $_POST['harga_beli'], $_POST['harga_jual'], $_POST['kategori'], $_POST['foto_lama']);
+		}
 	}
 	if ($action == "tambah_kasir") {
 		$root->tambah_kasir($_POST['nama_kasir'], $_POST['password']);
@@ -85,10 +106,10 @@ if (isset($_GET['action'])) {
 		session_start();
 		$trx = date("d") . "/AF/" . $_SESSION['id'] . "/" . date("y/h/i/s");
 
-		if (!empty($_POST["email"])) {
+		if (!empty($_POST["email"]) || !empty($_POST['nama_pembeli'])) {
 			$query = $root->con->query("INSERT INTO transaksi SET kode_kasir='$_SESSION[id]',total_bayar='$_POST[total_bayar]',no_invoice='$trx',nama_pembeli='$_POST[nama_pembeli]',email='$_POST[email]'");
 		} else {
-			$query = $root->con->query("INSERT INTO transaksi SET kode_kasir='$_SESSION[id]',total_bayar='$_POST[total_bayar]',no_invoice='$trx',nama_pembeli='$_POST[nama_pembeli]'");
+			$query = $root->con->query("INSERT INTO transaksi SET kode_kasir='$_SESSION[id]',total_bayar='$_POST[total_bayar]',no_invoice='$trx',nama_pembeli='-', email='-'");
 		}
 
 		$trx2 = date("d") . "/AF/" . $_SESSION['id'] . "/" . date("y");
@@ -119,17 +140,137 @@ if (isset($_GET['action'])) {
 	if ($action == "edit_diskon") {
 		if (empty($_POST['jumlah_diskon'])) {
 			$query = $root->con->query("DELETE FROM tb_diskon WHERE id_barang='$_POST[id_barang]'");
+			$barang = $root->con->query("SELECT * FROM barang WHERE id_barang='$_POST[id_barang]'");
+			$barangGet = $barang->fetch_assoc();
+			$hargaBarang = $barangGet['harga_jual'];
+			$queryTempo = $root->con->query("UPDATE tempo SET total_harga=jumlah_beli*'$hargaBarang' WHERE id_barang='$_POST[id_barang]'");
 		} else {
 			$query = $root->con->query("UPDATE tb_diskon SET jumlah_diskon='$_POST[jumlah_diskon]' WHERE id_barang='$_POST[id_barang]'");
+			$barang = $root->con->query("SELECT * FROM barang WHERE id_barang='$_POST[id_barang]'");
+			$barangGet = $barang->fetch_assoc();
+			$hargaBarang = $barangGet['harga_jual'];
+
+			// masih kurang disini
+			$quTemp = $root->con->query("SELECT * FROM tempo WHERE id_barang='$_POST[id_barang]'");
+			$getTemp = $quTemp->fetch_assoc();
+			$getJumlah = $getTemp['jumlah_beli'];
+			$persen = $_POST['jumlah_diskon'] / 100;
+			$subTotal = ($getJumlah * $hargaBarang) * $persen;
+			$grandTotal = ($getJumlah * $hargaBarang) - $subTotal;
+
+			$queryTempo = $root->con->query("UPDATE tempo SET total_harga='$grandTotal' WHERE id_barang='$_POST[id_barang]'");
 		}
 
-		if ($query === TRUE) {
+
+		if ($query === TRUE && $queryTempo === TRUE) {
 			$root->alert("Diskon Berhasil Diubah");
 			$root->redirect("barang.php");
 		} else {
 			$root->alert("Terjadi Kesalahan");
 			$root->go_back();
 		}
+	}
+	if ($action == "edit_diskon_kasir") {
+		if (empty($_POST['jumlah_diskon'])) {
+			$query = $root->con->query("DELETE FROM tb_diskon WHERE id_barang='$_POST[id_barang]'");
+			$barang = $root->con->query("SELECT * FROM barang WHERE id_barang='$_POST[id_barang]'");
+			$barangGet = $barang->fetch_assoc();
+			$hargaBarang = $barangGet['harga_jual'];
+			$queryTempo = $root->con->query("UPDATE tempo SET total_harga=jumlah_beli*'$hargaBarang' WHERE id_barang='$_POST[id_barang]'");
+		} else {
+			$query = $root->con->query("UPDATE tb_diskon SET jumlah_diskon='$_POST[jumlah_diskon]' WHERE id_barang='$_POST[id_barang]'");
+			$barang = $root->con->query("SELECT * FROM barang WHERE id_barang='$_POST[id_barang]'");
+			$barangGet = $barang->fetch_assoc();
+			$hargaBarang = $barangGet['harga_jual'];
+
+			// masih kurang disini
+			$quTemp = $root->con->query("SELECT * FROM tempo WHERE id_barang='$_POST[id_barang]'");
+			$getTemp = $quTemp->fetch_assoc();
+			$getJumlah = $getTemp['jumlah_beli'];
+			$persen = $_POST['jumlah_diskon'] / 100;
+			$subTotal = ($getJumlah * $hargaBarang) * $persen;
+			$grandTotal = ($getJumlah * $hargaBarang) - $subTotal;
+
+			$queryTempo = $root->con->query("UPDATE tempo SET total_harga='$grandTotal' WHERE id_barang='$_POST[id_barang]'");
+		}
+
+
+		if ($query === TRUE && $queryTempo === TRUE) {
+			$hasil = 0;
+		} else {
+			$hasil = 1;
+		}
+
+		echo $hasil;
+	}
+	if ($action == "tambah_potongan") {
+		$root->tambah_potongan($_POST['id_barang'], $_POST['jumlah_potongan']);
+	}
+	if ($action == "edit_potongan") {
+		if (empty($_POST['jumlah_potongan'])) {
+			$query = $root->con->query("DELETE FROM tb_potongan WHERE id_barang='$_POST[id_barang]'");
+			$barang = $root->con->query("SELECT * FROM barang WHERE id_barang='$_POST[id_barang]'");
+			$barangGet = $barang->fetch_assoc();
+			$hargaBarang = $barangGet['harga_jual'];
+			$queryTempo = $root->con->query("UPDATE tempo SET total_harga=jumlah_beli*'$hargaBarang' WHERE id_barang='$_POST[id_barang]'");
+		} else {
+			$query = $root->con->query("UPDATE tb_potongan SET jumlah_potongan='$_POST[jumlah_potongan]' WHERE id_barang='$_POST[id_barang]'");
+			$barang = $root->con->query("SELECT * FROM barang WHERE id_barang='$_POST[id_barang]'");
+			$barangGet = $barang->fetch_assoc();
+			$hargaBarang = $barangGet['harga_jual'];
+
+			// masih kurang disini
+			$quTemp = $root->con->query("SELECT * FROM tempo WHERE id_barang='$_POST[id_barang]'");
+			$getTemp = $quTemp->fetch_assoc();
+			$getJumlah = $getTemp['jumlah_beli'];
+			$subTotal = ($getJumlah * $hargaBarang) - $_POST['jumlah_potongan'];
+
+			$queryTempo = $root->con->query("UPDATE tempo SET total_harga='$subTotal' WHERE id_barang='$_POST[id_barang]'");
+		}
+
+		if ($query === TRUE && $queryTempo === TRUE) {
+			$root->alert("Potongan Berhasil Diubah");
+			$root->redirect("barang.php");
+		} else {
+			$root->alert("Terjadi Kesalahan");
+			$root->go_back();
+		}
+	}
+	if ($action == "edit_potongan_kasir") {
+		if (empty($_POST['jumlah_potongan'])) {
+			$query = $root->con->query("DELETE FROM tb_potongan WHERE id_barang='$_POST[id_barang]'");
+			$barang = $root->con->query("SELECT * FROM barang WHERE id_barang='$_POST[id_barang]'");
+			$barangGet = $barang->fetch_assoc();
+			$hargaBarang = $barangGet['harga_jual'];
+			$queryTempo = $root->con->query("UPDATE tempo SET total_harga=jumlah_beli*'$hargaBarang' WHERE id_barang='$_POST[id_barang]'");
+		} else {
+			$query = $root->con->query("UPDATE tb_potongan SET jumlah_potongan='$_POST[jumlah_potongan]' WHERE id_barang='$_POST[id_barang]'");
+			$barang = $root->con->query("SELECT * FROM barang WHERE id_barang='$_POST[id_barang]'");
+			$barangGet = $barang->fetch_assoc();
+			$hargaBarang = $barangGet['harga_jual'];
+
+			// masih kurang disini
+			$quTemp = $root->con->query("SELECT * FROM tempo WHERE id_barang='$_POST[id_barang]'");
+			$getTemp = $quTemp->fetch_assoc();
+			$getJumlah = $getTemp['jumlah_beli'];
+			$subTotal = ($getJumlah * $hargaBarang) - $_POST['jumlah_potongan'];
+
+			$queryTempo = $root->con->query("UPDATE tempo SET total_harga='$subTotal' WHERE id_barang='$_POST[id_barang]'");
+		}
+
+		if ($query === TRUE && $queryTempo === TRUE) {
+			$hasil = 0;
+		} else {
+			$hasil = 1;
+		}
+
+		echo $hasil;
+	}
+	if ($action == "tambah_diskon_kasir") {
+		$root->tambah_diskon_kasir($_POST['id_barang'], $_POST['jumlah_diskon']);
+	}
+	if ($action == "tambah_potongan_kasir") {
+		$root->tambah_potongan_kasir($_POST['id_barang'], $_POST['jumlah_potongan']);
 	}
 } else {
 	echo "no direct script are allowed";
