@@ -39,14 +39,5 @@
     </div>
 </div>
 <script>
-    $("#myform").validate({
-        rules: {
-            jumlah_diskon: {
-                number: true
-            }
-        },
-        messages: {
-            number: "Harus Berupa Angka Bulat atau Desimal"
-        }
-    });
+
 </script>

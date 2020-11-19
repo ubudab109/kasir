@@ -272,6 +272,17 @@ if (isset($_GET['action'])) {
 	if ($action == "tambah_potongan_kasir") {
 		$root->tambah_potongan_kasir($_POST['id_barang'], $_POST['jumlah_potongan']);
 	}
+	// validasi jumlah diskon
+	if ($action == "validasi_diskon") {
+		$jumlahDiskon = $_POST['jumlah_diskon'];
+		if ($jumlahDiskon > 100) {
+			$hasil = 0;
+		} else {
+			$hasil = 1;
+		}
+
+		echo $hasil;
+	}
 } else {
 	echo "no direct script are allowed";
 }

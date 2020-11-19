@@ -116,11 +116,12 @@
 					<div class="form-group">
 						<label for="jumlah_diskon">Jumlah Diskon Dalam % :</label>
 						<div class="input-group mb-2">
-							<input type="text" id="jumlah_diskon" name="jumlah_diskon" class="form-control">
+							<input type="number" id="jumlah_diskon" min="0" max="100" step="0.01" name="jumlah_diskon" class="form-control">
 							<div class="input-group-prepend">
 								<div class="input-group-text">%</div>
 							</div>
 						</div>
+						<p class="text-danger" id="err_jumlah_diskon"></p>
 						<input type="hidden" id="barang_id" name="id_barang" class="form-control">
 					</div>
 					<br>
@@ -138,8 +139,6 @@
 						<p class="text-danger" id="err_jumlah_potongan"></p>
 						<input type="hidden" id="barang_id_potongan" name="id_barang" class="form-control">
 					</div>
-					<!-- <input type="text" name="jumlah_potongan" class="form-control"> -->
-					<!-- <input type="submit" class="form-control"> -->
 					<br>
 					<button type="submit" id="simpan_potongan" class="btn btn-primary">Simpan</button>
 
@@ -170,11 +169,12 @@
 					<div class="form-group">
 						<label for="jumlah_diskon">Jumlah Diskon Dalam % :</label>
 						<div class="input-group mb-2">
-							<input type="text" id="edit_jumlah_diskon" name="jumlah_diskon" class="form-control">
+							<input type="number" id="edit_jumlah_diskon" min="0" max="100" step="0.01" name="jumlah_diskon" class="form-control">
 							<div class="input-group-prepend">
 								<div class="input-group-text">%</div>
 							</div>
 						</div>
+						<p class="text-danger" id="err_edit_diskon"></p>
 						<input type="hidden" id="edit_barang_id" name="id_barang" class="form-control">
 					</div>
 					<br>
@@ -213,6 +213,8 @@
 								<div class="input-group-text">Rp. </div>
 							</div>
 							<input type="number" id="edit_jumlah_potongan" name="jumlah_diskon" class="form-control">
+							<p class="text-danger" id="err_edit_potongan"></p>
+
 						</div>
 
 						<input type="hidden" id="edit_id_barang" name="id_barang" class="form-control">
@@ -357,6 +359,27 @@
 			}
 
 		})
+		// validasi jumlah diskon
+		$("#jumlah_diskon").keyup((e) => {
+			e.preventDefault();
+			var jumlahDiskon = $("#jumlah_diskon").val();
+			$.ajax({
+				url: "handler.php?action=validasi_diskon",
+				type: "POST",
+				data: {
+					jumlah_diskon: jumlahDiskon
+				},
+				success: function(res) {
+					if (res == 0) {
+						document.getElementById("err_jumlah_diskon").innerHTML = "Diskon Tidak Boleh Melebihi 100%";
+						$("#simpan_diskon").prop('disabled', true);
+					} else {
+						$("#simpan_diskon").prop('disabled', false);
+						document.getElementById("err_jumlah_diskon").innerHTML = "";
+					}
+				}
+			})
+		})
 
 		// untuk potongan
 		$("#simpan_potongan").click(function(e) {
@@ -448,6 +471,29 @@
 			})
 		})
 
+		$("#edit_jumlah_potongan").keyup((e) => {
+			var jumlahPotongan = $("#edit_jumlah_potongan").val();
+			var idBarang = document.getElementById('edit_id_barang').value;
+
+			$.ajax({
+				url: 'potongan_validate.php?id_barang=' + idBarang,
+				method: 'POST',
+				data: {
+					jumlah_potongan: jumlahPotongan
+				},
+				success: function(res) {
+					if (res == 0) {
+						document.getElementById("err_edit_potongan").innerHTML = "Potongan Tidak Boleh Melebihi Harga Barang";
+						$("#ubah_potongan").prop('disabled', true);
+					} else {
+						$("#ubah_potongan").prop('disabled', false);
+						document.getElementById("err_edit_potongan").innerHTML = "";
+					}
+				}
+			})
+
+		})
+
 		// edit diskom
 		$("#ubah_diskon").click((e) => {
 			e.preventDefault();
@@ -474,6 +520,30 @@
 						alert("Terjadi Kesalahan Silahkan Ulangi Kembali");
 					}
 				}
+			})
+		})
+
+		// validasi jumlah diskon
+		$("#edit_jumlah_diskon").keyup((e) => {
+			e.preventDefault();
+			var jumlahDiskon = $("#edit_jumlah_diskon").val();
+
+			$.ajax({
+				url: "handler.php?action=validasi_diskon",
+				type: "POST",
+				data: {
+					jumlah_diskon: jumlahDiskon
+				},
+				success: function(res) {
+					if (res == 0) {
+						document.getElementById("err_edit_diskon").innerHTML = "Diskon Tidak Boleh Melebihi 100%";
+						$("#ubah_diskon").prop('disabled', true);
+					} else {
+						$("#ubah_diskon").prop('disabled', false);
+						document.getElementById("err_edit_diskon").innerHTML = "";
+					}
+				}
+
 			})
 		})
 
