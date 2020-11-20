@@ -64,7 +64,7 @@
 								</td>
 								<td>
 									<div class="input-group">
-										<input required="required" min="0" max="100" class="form-control mb-2 mr-sm-2" id="jumlah_beli" type="number" name="jumlah">
+										<input required="required" min="0" max="100" class="form-control mb-2 mr-sm-2" id="jumlah_beli" type="number" step="1" onkeypress='return event.charCode >= 48 && event.charCode <= 57' name="jumlah">
 										<p class="text-danger" id="err_jumlah"></p>
 										<input type="hidden" class="form-control mb-2 mr-sm-2" id="trx" name="trx" value="<?php echo date("d") . "/AF/" . $_SESSION['id'] . "/" . date("y") ?>">
 									</div>

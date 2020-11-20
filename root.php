@@ -103,16 +103,27 @@ class penjualan
 	{
 		$queryDiskon = $this->con->query("SELECT * FROM tb_diskon WHERE id_barang='$idBarang'");
 		$dataDiskon = $queryDiskon->fetch_assoc();
+		$queryBarang = $this->con->query("SELECT * FROM barang WHERE id_barang='$idBarang'");
+		$dataBarang = $queryBarang->fetch_assoc();
 		if ($queryDiskon->num_rows > 0) {
 			$this->alert("Harga Barang Sudah Ada Diskon '$dataDiskon[jumlah_diskon]'% Silahkan Hapus Terlebih Dahulu");
 			$this->redirect("barang.php");
 		} else {
-			$query = $this->con->query("INSERT INTO tb_potongan SET jumlah_potongan='$jumlahDiskon', id_barang='$idBarang'");
+			$selectTempo = $this->con->query("SELECT * FROM tempo WHERE id_barang='$idBarang'");
+			if ($selectTempo->num_rows > 0) {
+				$ubah = $selectTempo->fetch_assoc();
+				$jumbel = $ubah['jumlah_beli'];
+				// $totalDiskon = $jumlahDiskon / 100;
+				$total_diskon = ($jumbel * $dataBarang['harga_jual']) - $jumlahDiskon;
+				$query = $this->con->query("UPDATE tempo SET total_harga='$total_diskon',potongan='$jumlahDiskon', jenis_potongan='potongan' WHERE id_barang='$idBarang'");
+			} else {
+				$query = $this->con->query("INSERT INTO tb_potongan SET jumlah_potongan='$jumlahDiskon', id_barang='$idBarang'");
+			}
 			if ($query === TRUE) {
 				$this->alert("Berhasil Menambahkan Potongan");
 				$this->redirect("barang.php");
 			} else {
-				$this->alert("Terjadi Kesalahan Silahkan Ulangi Kembali");
+				$this->alert("Data Sudah Ada");
 				$this->redirect("barang.php");
 			}
 		}
@@ -135,7 +146,7 @@ class penjualan
 					// $totalDiskon = $jumlahDiskon / 100;
 					$total_diskon = ($jumbel * $data['harga_jual']) - $jumlahDiskon;
 					// $total_harga = ($jumbel * $data['harga_jual']) - $total_diskon;
-					$this->con->query("UPDATE tempo SET total_harga=$total_diskon WHERE id_barang='$idBarang'");
+					$this->con->query("UPDATE tempo SET total_harga=$total_diskon, potongan='$jumlahDiskon',jenis_potongan='potongan' WHERE id_barang='$idBarang'");
 				} else {
 					$this->alert("Terjadi Kesalahan");
 				}
@@ -166,7 +177,7 @@ class penjualan
 					$totalDiskon = $jumlahDiskon / 100;
 					$total_diskon = ($jumbel * $data['harga_jual']) * $totalDiskon;
 					$total_harga = ($jumbel * $data['harga_jual']) - $total_diskon;
-					$this->con->query("UPDATE tempo SET total_harga=$total_harga WHERE id_barang='$idBarang'");
+					$this->con->query("UPDATE tempo SET total_harga=$total_harga, potongan='$jumlahDiskon',jenis_potongan='diskon' WHERE id_barang='$idBarang'");
 				} else {
 					$this->alert("Terjadi Kesalahan");
 				}
@@ -180,12 +191,13 @@ class penjualan
 	}
 	function tambah_barang($nama_barang, $stok, $harga_beli, $harga_jual, $id_kategori, $file)
 	{
+		$date = date("Y-m-d H:i:s");
 		$query = $this->con->query("select * from barang where nama_barang='$nama_barang'");
 		if ($query->num_rows > 0) {
 			$this->alert("Data barang sudah ada");
 			$this->go_back();
 		} else {
-			$query2 = $this->con->query("insert into barang set nama_barang='$nama_barang',id_kategori='$id_kategori',stok='$stok',harga_beli='$harga_beli',harga_jual='$harga_jual', foto_produk='$file'");
+			$query2 = $this->con->query("insert into barang set nama_barang='$nama_barang',id_kategori='$id_kategori',stok='$stok',harga_beli='$harga_beli',harga_jual='$harga_jual', foto_produk='$file', date_added='$date'");
 			if ($query2 === TRUE) {
 				$this->alert("Barang Berhasil Ditambahkan");
 				$this->redirect("barang.php");
@@ -683,6 +695,7 @@ class penjualan
 		$q1 = $this->con->query("select * from barang where id_barang='$id_barang'");
 		$data = $q1->fetch_assoc();
 		$quDiskon = $this->con->query("SELECT * FROM tb_diskon WHERE id_barang='$id_barang'");
+		$quPotongan = $this->con->query("SELECT * FROM tb_potongan WHERE id_barang='$id_barang'");
 
 		if ($data['stok'] < $jumlah) {
 			$this->alert("stock tidak mencukupi");
@@ -699,14 +712,26 @@ class penjualan
 					$totalDiskon = $jumlahDiskon / 100;
 					$total_diskon = ($jumbel * $data['harga_jual']) * $totalDiskon;
 					$total_harga = ($jumbel * $data['harga_jual']) - $total_diskon;
+					$dbquery = $this->con->query("update tempo set jumlah_beli='$jumbel',total_harga='$total_harga', potongan='$jumlahDiskon',jenis_potongan='diskon' where id_barang='$id_barang'");
 				} else {
-					$total_harga = $jumbel * $data['harga_jual'];
+					if ($quPotongan->num_rows > 0) {
+						$fetch = $quPotongan->fetch_assoc();
+						$jumlahPotongan = $fetch['jumlah_potongan'];
+						$total_harga = ($jumbel * $data['harga_jual']) - $jumlahPotongan;
+						$dbquery = $this->con->query("update tempo set jumlah_beli='$jumbel',total_harga='$total_harga', potongan='$jumlahPotongan',jenis_potongan='potongan' where id_barang='$id_barang'");
+					} else {
+						$total_harga = $jumlah * $data['harga_jual'];
+						$dbquery = $this->con->query("update tempo set jumlah_beli='$jumbel',total_harga='$total_harga' where id_barang='$id_barang'");
+					}
+					// $total_harga = $jumbel * $data['harga_jual'];
 				}
-				$dbquery = $this->con->query("update tempo set jumlah_beli='$jumbel',total_harga='$total_harga' where id_barang='$id_barang'");
+				// $dbquery = $this->con->query("update tempo set jumlah_beli='$jumbel',total_harga='$total_harga' where id_barang='$id_barang'");
 				if ($dbquery === TRUE) {
 					$this->con->query("update barang set stok=stok-$jumlah where id_barang='$id_barang'");
 					// $this->alert("Tersimpan");
 					// $this->redirect("transaksi.php?action=transaksi_baru");
+				} else {
+					$this->alert("Terjadi Kesalahan Silahkan Ulangi");
 				}
 			} else {
 				if ($quDiskon->num_rows > 0) {
@@ -715,11 +740,19 @@ class penjualan
 					$totalDiskon = $jumlahDiskon / 100;
 					$total_diskon = ($jumlah * $data['harga_jual']) * $totalDiskon;
 					$total_harga = ($jumlah * $data['harga_jual']) - $total_diskon;
+					$query1 = $this->con->query("insert into tempo set id_barang='$id_barang',jumlah_beli='$jumlah',potongan='$jumlahDiskon',total_harga='$total_harga',jenis_potongan='diskon', trx='$trx'");
 				} else {
-					$total_harga = $jumlah * $data['harga_jual'];
+					if ($quPotongan->num_rows > 0) {
+						$fetch = $quPotongan->fetch_assoc();
+						$jumlahPotongan = $fetch['jumlah_potongan'];
+						$total_harga = ($jumlah * $data['harga_jual']) - $jumlahPotongan;
+						$query1 = $this->con->query("insert into tempo set id_barang='$id_barang',jumlah_beli='$jumlah',potongan='$jumlahPotongan',total_harga='$total_harga',jenis_potongan='potongan', trx='$trx'");
+					} else {
+						$total_harga = $jumlah * $data['harga_jual'];
+						$query1 = $this->con->query("insert into tempo set id_barang='$id_barang',jumlah_beli='$jumlah',total_harga='$total_harga',trx='$trx'");
+					}
 				}
 				// $total_harga = $jumlah * $data['harga_jual'];
-				$query1 = $this->con->query("insert into tempo set id_barang='$id_barang',jumlah_beli='$jumlah',total_harga='$total_harga',trx='$trx'");
 				if ($query1 === TRUE) {
 					$this->con->query("update barang set stok=stok-$jumlah where id_barang='$id_barang'");
 					$hasil = 0;

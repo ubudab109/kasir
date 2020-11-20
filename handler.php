@@ -19,15 +19,15 @@ if (isset($_GET['action'])) {
 		$ext = pathinfo($filename, PATHINFO_EXTENSION);
 		$file = $rand . '-' . $filename;
 		if (!in_array($ext, $ekstensi)) {
-			$this->alert("Format harus JPEG, JPG atau PNG");
-			$this->go_back();
+			$root->alert("Harap Isi Foto Dengan Format harus JPEG, JPG atau PNG");
+			$root->go_back();
 		} else {
 			if ($ukuran < 2044070) {
 				move_uploaded_file($_FILES['foto']['tmp_name'], 'images/produk/' . $file);
 				$root->tambah_barang($_POST['nama_barang'], $_POST['stok'], $_POST['harga_beli'], $_POST['harga_jual'], $_POST['kategori'], $file);
 			} else {
-				$this->alert("Maksimal Foto : 2 MegaByte");
-				$this->go_back();
+				$root->alert("Maksimal Foto : 2 MegaByte");
+				$root->go_back();
 			}
 		}
 	}
@@ -176,14 +176,13 @@ if (isset($_GET['action'])) {
 			$barang = $root->con->query("SELECT * FROM barang WHERE id_barang='$_POST[id_barang]'");
 			$barangGet = $barang->fetch_assoc();
 			$hargaBarang = $barangGet['harga_jual'];
-			$queryTempo = $root->con->query("UPDATE tempo SET total_harga=jumlah_beli*'$hargaBarang' WHERE id_barang='$_POST[id_barang]'");
+			$queryTempo = $root->con->query("UPDATE tempo SET total_harga=jumlah_beli*'$hargaBarang', potongan=NULL, jenis_potongan=NULL WHERE id_barang='$_POST[id_barang]'");
 		} else {
 			$query = $root->con->query("UPDATE tb_diskon SET jumlah_diskon='$_POST[jumlah_diskon]' WHERE id_barang='$_POST[id_barang]'");
 			$barang = $root->con->query("SELECT * FROM barang WHERE id_barang='$_POST[id_barang]'");
 			$barangGet = $barang->fetch_assoc();
 			$hargaBarang = $barangGet['harga_jual'];
 
-			// masih kurang disini
 			$quTemp = $root->con->query("SELECT * FROM tempo WHERE id_barang='$_POST[id_barang]'");
 			$getTemp = $quTemp->fetch_assoc();
 			$getJumlah = $getTemp['jumlah_beli'];
@@ -191,7 +190,7 @@ if (isset($_GET['action'])) {
 			$subTotal = ($getJumlah * $hargaBarang) * $persen;
 			$grandTotal = ($getJumlah * $hargaBarang) - $subTotal;
 
-			$queryTempo = $root->con->query("UPDATE tempo SET total_harga='$grandTotal' WHERE id_barang='$_POST[id_barang]'");
+			$queryTempo = $root->con->query("UPDATE tempo SET total_harga='$grandTotal',potongan='$_POST[jumlah_diskon]' WHERE id_barang='$_POST[id_barang]'");
 		}
 
 
@@ -242,7 +241,7 @@ if (isset($_GET['action'])) {
 			$barang = $root->con->query("SELECT * FROM barang WHERE id_barang='$_POST[id_barang]'");
 			$barangGet = $barang->fetch_assoc();
 			$hargaBarang = $barangGet['harga_jual'];
-			$queryTempo = $root->con->query("UPDATE tempo SET total_harga=jumlah_beli*'$hargaBarang' WHERE id_barang='$_POST[id_barang]'");
+			$queryTempo = $root->con->query("UPDATE tempo SET total_harga=jumlah_beli*'$hargaBarang', potongan=NULL, jenis_potongan=NULL WHERE id_barang='$_POST[id_barang]'");
 		} else {
 			$query = $root->con->query("UPDATE tb_potongan SET jumlah_potongan='$_POST[jumlah_potongan]' WHERE id_barang='$_POST[id_barang]'");
 			$barang = $root->con->query("SELECT * FROM barang WHERE id_barang='$_POST[id_barang]'");

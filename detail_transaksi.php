@@ -86,6 +86,7 @@
 							<td></td>
 							<td></td>
 							<td></td>
+							<td></td>
 							<td>Grand Total :</td>
 							<td> Rp. <?= number_format($getsum1['grand_total']) ?></td>
 						</tr>

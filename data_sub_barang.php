@@ -6,6 +6,7 @@
             <th>Nama Barang</th>
             <th>Jumlah Beli</th>
             <th>Harga Barang</th>
+            <th>Harga Asli</th>
             <th>Diskon/Potongan</th>
             <th>Total Harga</th>
             <th>Aksi</th>
@@ -16,7 +17,8 @@
         include "root.php";
         session_start();
         $trx = date("d") . "/AF/" . $_SESSION['id'] . "/" . date("y");
-        $data = $root->con->query("SELECT barang.harga_jual, barang.nama_barang,tempo.id_subtransaksi,tempo.id_barang,tempo.jumlah_beli,tempo.total_harga from tempo inner join barang on barang.id_barang=tempo.id_barang where trx='$trx'");
+        // var_dump($_SESSION['id']);
+        $data = $root->con->query("SELECT barang.harga_jual, barang.nama_barang,tempo.id_subtransaksi,tempo.id_barang,tempo.jumlah_beli,tempo.total_harga,tempo.potongan,tempo.jenis_potongan from tempo inner join barang on barang.id_barang=tempo.id_barang where trx='$trx'");
 
         $no = 1;
         while ($f = $data->fetch_assoc()) {
@@ -27,36 +29,31 @@
                 <td><?= $f['jumlah_beli'] ?></td>
                 <td>Rp. <?= number_format($f['harga_jual']) ?></td>
                 <?php
-                $dataDiskon = $root->con->query("SELECT * FROM tb_diskon WHERE id_barang = '$f[id_barang]'");
-                if ($dataDiskon->num_rows > 0) {
-                    $fetch = $dataDiskon->fetch_assoc();
+                $hargaAsli = $f['harga_jual'] * $f['jumlah_beli'];
                 ?>
-                    <td class="text-center"><?= $fetch['jumlah_diskon'] ?>%
+                <td>Rp. <?= number_format($hargaAsli) ?></td>
+
+                <?php if ($f['jenis_potongan'] == 'diskon') { ?>
+                    <td><?= $f['potongan'] ?>%
                         <span>
-                            <button data-toggle="modal" data-target="#editDiskon" class="btn bluetbl m-r-10" onclick="editDiskon(<?= $fetch['id_barang'] ?>, <?= $fetch['jumlah_diskon'] ?>)"><span class="btn-edit-tooltip">Edit Diskon</span><i class="fas fa-pencil-alt"></i></button>
+                            <button data-toggle="modal" data-target="#editDiskon" class="btn bluetbl m-r-10" onclick="editDiskon(<?= $f['id_barang'] ?>, <?= $f['potongan'] ?>)"><span class="btn-edit-tooltip">Edit Diskon</span><i class="fas fa-pencil-alt"></i></button>
                         </span>
                     </td>
-                <?php   } else { ?>
-                    <td class="text-center">
-                        <?php
-                        $dataPotongan = $root->con->query("SELECT * FROM tb_potongan WHERE id_barang = '$f[id_barang]'");
-                        if ($dataPotongan->num_rows > 0) {
-                            $fetch = $dataPotongan->fetch_assoc();
-                        ?>
-                            Rp. <?= number_format($fetch['jumlah_potongan']) ?>
-                            <span>
-                                <button data-toggle="modal" data-target="#editPotongan" class="btn bluetbl m-r-10" onclick="editPotongan(<?= $fetch['id_barang'] ?>, <?= $fetch['jumlah_potongan'] ?>)"><span class="btn-edit-tooltip">Edit Potongan</span><i class="fas fa-pencil-alt"></i></button>
-                            </span>
-
-                        <?php } else { ?>
-                            <button type="button" class="" onClick="potongan(<?= $f['id_barang'] ?>)" data-toggle="modal" data-target="#exampleModal">
-                                Berikan Potongan
-                            </button>
-                        <?php } ?>
+                <?php } else if ($f['jenis_potongan'] == 'potongan') { ?>
+                    <td>Rp. <?= number_format($f['potongan']) ?>
+                        <span>
+                            <button data-toggle="modal" data-target="#editPotongan" class="btn bluetbl m-r-10" onclick="editPotongan(<?= $f['id_barang'] ?>, <?= $f['potongan'] ?>)"><span class="btn-edit-tooltip">Edit Potongan</span><i class="fas fa-pencil-alt"></i></button>
+                        </span>
                     </td>
+
+                <?php } else { ?>
+                    <td>
+                        <button type="button" class="" onClick="potongan(<?= $f['id_barang'] ?>)" data-toggle="modal" data-target="#exampleModal">
+                            Berikan Potongan
+                        </button>
+                    </td>
+
                 <?php } ?>
-
-
                 <td>Rp. <?= number_format($f['total_harga']) ?></td>
                 <td><a class="btn redtbl hapus" data-trx="<?= $f['trx'] ?>" data-sub="<?= $f['id_subtransaksi'] ?>" data-barang="<?= $f['id_barang'] ?>" data-jumlah="<?= $f['jumlah_beli'] ?>"><span class="btn-hapus-tooltip">Cancel</span><i class="fas fa-times"></i></a></td>
             </tr>
