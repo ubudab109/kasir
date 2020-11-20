@@ -16,7 +16,7 @@
         include "root.php";
         session_start();
         $trx = date("d") . "/AF/" . $_SESSION['id'] . "/" . date("y");
-        $data = $root->con->query("select barang.harga_jual, barang.nama_barang,tempo.id_subtransaksi,tempo.id_barang,tempo.jumlah_beli,tempo.total_harga from tempo inner join barang on barang.id_barang=tempo.id_barang where trx='$trx'");
+        $data = $root->con->query("SELECT barang.harga_jual, barang.nama_barang,tempo.id_subtransaksi,tempo.id_barang,tempo.jumlah_beli,tempo.total_harga from tempo inner join barang on barang.id_barang=tempo.id_barang where trx='$trx'");
 
         $no = 1;
         while ($f = $data->fetch_assoc()) {
@@ -89,6 +89,25 @@
             }
         })
     }
+
+    function getBarang(id) {
+        $.ajax({
+            url: "getDetail.php",
+            method: "POST",
+            // dataType: "json",
+            data: {
+                id_barang: id
+            },
+            success: function(res) {
+                var get = $.parseJSON(res);
+                var stok = get['stok'];
+                // var harga = get['harga_jual'];
+                // var output = (harga / 1000).toFixed(3);
+                // document.getElementById('stock').value = stok;
+                // document.getElementById('harga_jual').value = "Rp. " + output;
+            }
+        })
+    }
     // $("prosestran").click((e) => {
     //     e.preventDefault();
     //     var namaPembeli = document.getElementById("nama_pembeli").value
@@ -139,6 +158,10 @@
 
                         getTotalGrand()
                     });
+
+                },
+                complete: function() {
+                    getBarang(idBarang);
 
                 }
             })

@@ -686,6 +686,7 @@ class penjualan
 
 		if ($data['stok'] < $jumlah) {
 			$this->alert("stock tidak mencukupi");
+
 			// $this->redirect("transaksi.php?action=transaksi_baru");
 		} else {
 			$q = $this->con->query("select * from tempo where id_barang='$id_barang'");
@@ -721,11 +722,15 @@ class penjualan
 				$query1 = $this->con->query("insert into tempo set id_barang='$id_barang',jumlah_beli='$jumlah',total_harga='$total_harga',trx='$trx'");
 				if ($query1 === TRUE) {
 					$this->con->query("update barang set stok=stok-$jumlah where id_barang='$id_barang'");
+					$hasil = 0;
 					// $this->alert("Tersimpan");
 					// $this->redirect("transaksi.php?action=transaksi_baru");
+				} else {
+					$hasil = 1;
 				}
 			}
 		}
+		return $hasil;
 	}
 	function hapus_tempo($id_tempo, $id_barang, $jumbel)
 	{

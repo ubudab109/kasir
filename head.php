@@ -37,6 +37,8 @@ if (!isset($_SESSION['username'])) {
 					<span><?php echo $_SESSION['username']; ?></span>
 				</li>
 				<li><a id="dash" href="home.php"><i class="fa fa-home"></i> Dashboard</a></li>
+				<li><a id="transaksi" href="transaksi.php"><i class="fas fa-money-check"></i> Transaksi</a></li>
+
 				<li><a id="barang" href="barang.php"><i class="fa fa-bars"></i> Barang</a></li>
 				<li><a id="kategori" href="kategori.php"><i class="fa fa-tags"></i> Kategori Barang</a></li>
 				<li><a id="users" href="users.php"><i class="fa fa-users"></i> Kasir</a></li>
