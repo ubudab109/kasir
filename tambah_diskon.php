@@ -13,7 +13,7 @@
                     <div class="form-grop">
                         <label for="id_barang"> Pilih Barang :</label>
                         <br>
-                        <select style="width: 372px;cursor: pointer;" required="required" onchange="selected()" class="form-control chosen" id="id_barang" name="id_barang">
+                        <select style="width: 372px;cursor: pointer;" required="required" class="form-control chosen" id="id_barang" name="id_barang">
                             <option value="" selected>Pilih Barang</option>
                             <?php
 
@@ -53,39 +53,43 @@
 
     $(document).ready(() => {
         // validasi dropdown
-        $("#submit").prop('disabled', true);
+        $("#submit").hide();
 
-        selected();
+
         // validasi jumlah diskon
         $("#jumlah_diskon").keyup((e) => {
             e.preventDefault();
             var jumlahDiskon = $("#jumlah_diskon").val();
-            $.ajax({
-                url: "handler.php?action=validasi_diskon",
-                type: "POST",
-                data: {
-                    jumlah_diskon: jumlahDiskon
-                },
-                success: function(res) {
-                    if (res == 0) {
-                        document.getElementById("err_jumlah_diskon").innerHTML = "Diskon Tidak Boleh Melebihi 100%";
-                        $("#submit").prop('disabled', true);
-                    } else {
-                        $("#submit").prop('disabled', false);
-                        document.getElementById("err_jumlah_diskon").innerHTML = "";
-                    }
+            var id = $("#id_barang").find(":selected").val();
+
+            if (jumlahDiskon == "") {
+                $("#submit").hide();
+
+            } else {
+                if (id == "") {
+                    $("#submit").hide();
+                    document.getElementById("err_jumlah_diskon").innerHTML = "Harap Pilih Barang Terlebih Dahulu";
+                } else {
+                    // $("#submit").prop('disabled', false);
+                    $.ajax({
+                        url: "handler.php?action=validasi_diskon",
+                        type: "POST",
+                        data: {
+                            jumlah_diskon: jumlahDiskon
+                        },
+                        success: function(res) {
+                            if (res == 0) {
+                                document.getElementById("err_jumlah_diskon").innerHTML = "Diskon Tidak Boleh Melebihi 100%";
+                                $("#submit").hide();
+                            } else {
+                                $("#submit").show();
+                                document.getElementById("err_jumlah_diskon").innerHTML = "";
+                            }
+                        }
+                    })
                 }
-            })
+            }
+
         })
     })
-
-    function selected() {
-
-        var id = $("#id_barang").find(":selected").val();
-        if (id == "") {
-            $("#submit").prop('disabled', true);
-        } else {
-            $("#submit").prop('disabled', false);
-        }
-    }
 </script>

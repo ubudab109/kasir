@@ -105,7 +105,7 @@ if (isset($_GET['action']) && $_GET['action'] == "tambah_barang") {
 								<th>Stok</th>
 								<th width="120px">Harga Beli</th>
 								<th width="120px">Harga Jual</th>
-								<th width="120px">Diskon</th>
+								<th width="120px">Diskon/Potongan</th>
 								<th width="150px">Tanggal Ditambahkan</th>
 								<th width="60px">Aksi</th>
 							</tr>

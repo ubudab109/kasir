@@ -119,7 +119,7 @@ if (isset($_GET['action'])) {
 
 		$query2 = $root->con->query("select * from tempo where trx='$trx2'");
 		while ($f = $query2->fetch_assoc()) {
-			$root->con->query("insert into sub_transaksi set id_barang='$f[id_barang]',id_transaksi='$id_transaksi2',jumlah_beli='$f[jumlah_beli]',total_harga='$f[total_harga]',no_invoice='$trx'");
+			$root->con->query("insert into sub_transaksi set id_barang='$f[id_barang]',id_transaksi='$id_transaksi2',jumlah_beli='$f[jumlah_beli]',total_harga='$f[total_harga]',potongan='$f[potongan]',jenis_potongan='$f[jenis_potongan]',no_invoice='$trx'");
 		}
 		$root->con->query("delete from tempo where trx='$trx2'");
 		// var_dump($query);
@@ -158,7 +158,7 @@ if (isset($_GET['action'])) {
 			$subTotal = ($getJumlah * $hargaBarang) * $persen;
 			$grandTotal = ($getJumlah * $hargaBarang) - $subTotal;
 
-			$queryTempo = $root->con->query("UPDATE tempo SET total_harga='$grandTotal' WHERE id_barang='$_POST[id_barang]'");
+			$queryTempo = $root->con->query("UPDATE tempo SET total_harga='$grandTotal', potongan='$_POST[jumlah_diskon]' WHERE id_barang='$_POST[id_barang]'");
 		}
 
 
@@ -224,7 +224,7 @@ if (isset($_GET['action'])) {
 			$getJumlah = $getTemp['jumlah_beli'];
 			$subTotal = ($getJumlah * $hargaBarang) - $_POST['jumlah_potongan'];
 
-			$queryTempo = $root->con->query("UPDATE tempo SET total_harga='$subTotal' WHERE id_barang='$_POST[id_barang]'");
+			$queryTempo = $root->con->query("UPDATE tempo SET total_harga='$subTotal', potongan='$_POST[jumlah_potongan]' WHERE id_barang='$_POST[id_barang]'");
 		}
 
 		if ($query === TRUE && $queryTempo === TRUE) {
@@ -254,7 +254,7 @@ if (isset($_GET['action'])) {
 			$getJumlah = $getTemp['jumlah_beli'];
 			$subTotal = ($getJumlah * $hargaBarang) - $_POST['jumlah_potongan'];
 
-			$queryTempo = $root->con->query("UPDATE tempo SET total_harga='$subTotal' WHERE id_barang='$_POST[id_barang]'");
+			$queryTempo = $root->con->query("UPDATE tempo SET total_harga='$subTotal', potongan='$_POST[jumlah_potongan]' WHERE id_barang='$_POST[id_barang]'");
 		}
 
 		if ($query === TRUE && $queryTempo === TRUE) {

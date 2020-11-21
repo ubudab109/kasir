@@ -51,7 +51,7 @@
 							<th>Nama Barang</th>
 							<th>Jumlah Beli</th>
 							<th>Harga</th>
-							<th>Diskon</th>
+							<th>Diskon/Potongan</th>
 							<th>Total Harga</th>
 						</tr>
 					</thead>
@@ -68,15 +68,23 @@
 								<td><?= $f['nama_barang'] ?></td>
 								<td><?= $f['jumlah_beli'] ?></td>
 								<td>Rp. <?= number_format($f['harga_jual']) ?></td>
-								<?php 
-									$dataDiskon = $root->con->query("SELECT * FROM tb_diskon WHERE id_barang = '$f[id_barang]'");
-									if ($dataDiskon->num_rows > 0){ 
+								<?php
+								$dataDiskon = $root->con->query("SELECT * FROM tb_diskon WHERE id_barang = '$f[id_barang]'");
+								if ($dataDiskon->num_rows > 0) {
 									$fetch = $dataDiskon->fetch_assoc();
-									?>
+								?>
 									<td><?= $fetch['jumlah_diskon'] ?>%</td>
-								<?   } else{ ?>
-									<td>Tidak Ada Diskon</td>
-								<? }?>
+									<?php   } else {
+									$dataPotongan = $root->con->query("SELECT * FROM tb_potongan WHERE id_barang = '$f[id_barang]'");
+									if ($dataPotongan->num_rows > 0) {
+										$fetch = $dataPotongan->fetch_assoc();
+									?>
+										<td>Rp. <?= number_format($fetch['jumlah_potongan']) ?></td>
+									<?php } else { ?>
+										<td>Tidak Ada Diskon Atau Potongan</td>
+									<?php } ?>
+									<!-- <td>Tidak Ada Diskon</td> -->
+								<?php } ?>
 								<td>Rp. <?= number_format($f['total_harga']) ?></td>
 							</tr>
 						<?php

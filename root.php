@@ -287,8 +287,24 @@ class penjualan
 								</span>
 
 							<?php } else { ?>
-								Tidak ada Diskon ataupun Potongan
+								<?php
+								$quTempo = $this->con->query("SELECT * FROM tempo WHERE id_barang='$data[id_barang]'");
+								if ($quTempo->num_rows > 0) {
+									$tempo = $quTempo->fetch_assoc();
+									if ($tempo['jenis_potongan'] == 'diskon') { ?>
+										<?= $tempo['jumlah_potongan'] ?> %
+									<?php } else if ($tempo['jenis_potongan'] == 'potongan') { ?>
+										Rp. <?= number_format($tempo['jumlah_potongan']) ?>
+									<?php } else {
+										echo "Tidak ada Diskon ataupun Potongan";
+									} ?>
+
+								<?php	} else {
+									echo "Tidak ada Diskon ataupun Potongan";
+								} ?>
+
 							<?php } ?>
+
 						</td>
 					<?php } ?>
 					<td><?= date("d-m-Y", strtotime($data['date_added'])) ?></td>
