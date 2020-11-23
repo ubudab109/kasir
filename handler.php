@@ -123,7 +123,7 @@ if (isset($_GET['action'])) {
 		}
 		$root->con->query("delete from tempo where trx='$trx2'");
 		// var_dump($query);
-		$root->alert("Transaksi berhasil");
+		// $root->alert("Transaksi berhasil");
 		$root->redirect("transaksi.php");
 	}
 	if ($action == "delete_transaksi") {

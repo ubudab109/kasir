@@ -129,6 +129,8 @@
 						<p class="text-danger" id="err_jumlah_diskon"></p>
 						<input type="hidden" id="barang_id" name="id_barang" class="form-control">
 					</div>
+					<div id="err_diskon"></div>
+
 					<br>
 					<button type="submit" id="simpan_diskon" class="btn btn-primary">Simpan</button>
 				</form>
@@ -342,7 +344,8 @@
 			var jumlahDiskon = document.getElementById("jumlah_diskon").value;
 			var idBarang = document.getElementById("barang_id").value;
 			if (jumlahDiskon == "") {
-				alert("Jumlah Diskon Harus Diisi");
+				// alert("Jumlah Diskon Harus Diisi");
+				document.getElementById("err_diskon").innerHTML = "Jumlah Diskon Harus Diisi";
 			} else {
 				$.ajax({
 					type: 'POST',
@@ -473,9 +476,10 @@
 							$("#total_bayar").val(e)
 						})
 						$("#close_potongan").trigger("click");
-					} else {
-						alert("Terjadi Kesalahan Silahkan Ulangi Kembali");
 					}
+					// } else {
+					// 	alert("Terjadi Kesalahan Silahkan Ulangi Kembali");
+					// }
 				}
 
 			})
