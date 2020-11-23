@@ -325,7 +325,9 @@
 							document.getElementById('subt').reset()
 							$(".chosen").val('').trigger("chosen:updated");
 						} else {
-							alert("Jumlah Melebihi Stock Barang");
+							// alert("Jumlah Melebihi Stock Barang");
+							document.getElementById('err_jumlah').innerHTML = "Jumlah Beli Tidak Boleh Melebihi Stok Barang";
+
 						}
 
 					},

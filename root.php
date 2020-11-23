@@ -714,7 +714,7 @@ class penjualan
 		$quPotongan = $this->con->query("SELECT * FROM tb_potongan WHERE id_barang='$id_barang'");
 
 		if ($data['stok'] < $jumlah) {
-			$this->alert("stock tidak mencukupi");
+			$hasil = $this->alert("stock tidak mencukupi");
 
 			// $this->redirect("transaksi.php?action=transaksi_baru");
 		} else {
@@ -744,8 +744,6 @@ class penjualan
 				// $dbquery = $this->con->query("update tempo set jumlah_beli='$jumbel',total_harga='$total_harga' where id_barang='$id_barang'");
 				if ($dbquery === TRUE) {
 					$this->con->query("update barang set stok=stok-$jumlah where id_barang='$id_barang'");
-					// $this->alert("Tersimpan");
-					// $this->redirect("transaksi.php?action=transaksi_baru");
 				} else {
 					$this->alert("Terjadi Kesalahan Silahkan Ulangi");
 				}
@@ -772,8 +770,6 @@ class penjualan
 				if ($query1 === TRUE) {
 					$this->con->query("update barang set stok=stok-$jumlah where id_barang='$id_barang'");
 					$hasil = 0;
-					// $this->alert("Tersimpan");
-					// $this->redirect("transaksi.php?action=transaksi_baru");
 				} else {
 					$hasil = 1;
 				}
